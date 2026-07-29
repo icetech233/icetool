@@ -1,0 +1,6 @@
+{
+  // 关闭内置 CSS 校验：Tailwind v4 的 @theme / @custom-variant / @apply 等
+  // 自定义 at-rule 会被原生 CSS language server 误报为 Unknown at rule。
+  // 这些规则由 @tailwindcss/postcss 正常处理，构建不受影响。
+  "css.validate": false
+}
