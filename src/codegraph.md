@@ -4,23 +4,23 @@
 
 本项目的 JWT 解码工具（JWT Parser）是一个基于 React 19 + TypeScript 的纯前端单页应用，
 用于实时解析、解码并高亮展示 JWT（JSON Web Token）的 Header、Payload 与 Signature 三部分。
-项目采用现代化构建工具链（Rsbuild）与 Tailwind CSS v4，通过自定义 Hook 与展示组件分离关注点，
+项目采用现代化构建工具链（Vite 7）与 Tailwind CSS v4，通过自定义 Hook 与展示组件分离关注点，
 代码结构清晰、易于维护。UI 使用推特（X）风格的浅色主题。
 
 ## 技术栈
 
 - **框架**：React 19（`react` / `react-dom`），函数组件 + Hooks。
-- **构建工具**：Rsbuild（`@rsbuild/core` + `@rsbuild/plugin-react`），启动/构建/预览脚本见 `package.json`。
+- **构建工具**：Vite 7（`vite` + `@vitejs/plugin-react`），启动/构建/预览脚本见 `package.json`。
 - **样式方案**：Tailwind CSS v4（`@tailwindcss/postcss` + `tailwindcss`），采用 CSS-first 配置。
 - **语言**：TypeScript（`tsconfig.json`）。
-- **说明**：`framer-motion` 已在 `package.json` 中声明为依赖，但当前源码中尚未使用。
+- **动画**：`framer-motion` 已在 `package.json` 中声明为依赖，用于 `App`（标题/卡片入场 stagger）与 `JwtOutput`（状态切换 `AnimatePresence` + 解码卡片错落入场，错误态抖动）。
 
 ## 文件结构与模块职责
 
 ```
 jwtparse/
 ├── package.json            # 依赖与脚本（dev / build / preview）
-├── rsbuild.config.ts       # Rsbuild 构建配置（React 插件 + Tailwind PostCSS 插件）
+├── vite.config.ts          # Vite 构建配置（React 插件 + `@` 别名）
 ├── postcss.config.js       # PostCSS 配置
 ├── tsconfig.json           # TypeScript 配置
 ├── bun.lock                # Bun 依赖锁文件
@@ -64,14 +64,14 @@ jwtparse/
 
 - **职责**：
   - 输入：JWT 字符串；输出：`{ header, payload, signature, error }`。
-  - 通过 `useEffect` 在 `token` 变化时触发解码：
-    - 空输入时重置状态（等待输入提示）。
+  - 通过 `useMemo` 在 `token` 变化时**同步派生**解码结果（单次渲染，无 `useEffect` 触发的冗余二次渲染）：
+    - 空输入时返回空状态（等待输入提示）。
     - 按 `.` 拆分为 3 段，否则返回格式错误。
-    - 对 Header、Payload 做 Base64Url 解码并 `JSON.parse` 后格式化（2 空格缩进）。
+    - 对 Header、Payload 做 Base64Url 解码并 `JSON.parse` 后格式化（2 空格缩进）；解码使用 `TextDecoder('utf-8')` 配合 `Uint8Array`，正确还原中文等 UTF-8 多字节字符（旧实现 `atob` 直接转字符串会乱码）。
     - Signature 原样保留（不解密，仅展示）。
     - 任何异常（Base64/JSON 解析失败）返回统一的「解码失败」错误。
   - 纯逻辑，不依赖任何 UI 组件，可复用。
-- **依赖**：仅 React 基础 Hook。
+- **依赖**：仅 React 基础 Hook（`useMemo`）。
 
 ### 3. `JwtInput.tsx`（JWT 输入组件）
 
@@ -108,3 +108,13 @@ jwtparse/
 - `JwtInput.tsx`、`JwtOutput.tsx` 为纯展示组件，分别负责「输入」「输出」UI，不直接持有 JWT 状态。
 - 主题完全由 `global.css` 的 CSS 变量驱动，组件仅需使用语义化工具类（如 `bg-card`、`text-primary`），
   因此切换主题无需改动组件代码。
+
+## 近期工程变更
+
+- **解码逻辑重构**：`useJwt` 由 `useState` + `useEffect` 改为 `useMemo` 同步派生，去除 token 变化时的冗余渲染。
+- **UTF-8 解码修复**：`base64UrlDecode` 改用 `Uint8Array` + `TextDecoder('utf-8')`，修复 `atob` 导致的中文/多字节乱码。
+- **类型安全**：`tsconfig.json` 开启 `strict`、`noUnusedLocals`、`noUnusedParameters`、`noFallthroughCasesInSwitch`、`forceConsistentCasingInFileNames`。
+- **清理无效指令**：移除 `useJwt.ts` / `JwtInput.tsx` / `JwtOutput.tsx` / `App.tsx` 首行的 `'use client'`（本项目为 Vite SPA，无 RSC 边界，该指令无效）。
+- **动画体验**：引入 `framer-motion`，为 `App` 与 `JwtOutput` 添加入场与状态切换动画（见上文技术栈与组件说明）。
+- **高亮叠层稳健性**：`JwtInput` 用 `text-transparent`（跨浏览器隐藏真实文字）+ 透明边框，与高亮层实现像素级对齐。
+- **文档修正**：原文将构建工具误写为 Rsbuild，已更正为 Vite 7。

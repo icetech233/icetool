@@ -1,5 +1,3 @@
-'use client';
-
 /**
  * A controlled component for JWT input.
  * It provides a textarea for user input and a synchronized, syntax-highlighted
@@ -62,19 +60,23 @@ export function JwtInput({ value, onChange }: JwtInputProps) {
         {/* Highlight display layer */}
         <div
           ref={highlightRef}
-          className="absolute inset-0 w-full h-full bg-input border border-border rounded-lg p-4 text-sm font-mono pointer-events-none overflow-hidden whitespace-pre-wrap break-all z-10"
+          aria-hidden="true"
+          className="absolute inset-0 w-full h-full bg-input border border-border rounded-lg p-4 text-sm font-mono leading-5 pointer-events-none overflow-hidden whitespace-pre-wrap break-all z-10"
         >
           {renderHighlightedJWT(value)}
         </div>
-        {/* Input layer */}
+        {/* Input layer.
+            `text-transparent` hides the real text in all engines (WebKit/Blink/Gecko)
+            while `caret-primary` keeps the caret visible; the visible glyphs are
+            painted by the highlight layer above. The transparent border matches the
+            highlight layer's border box so both share identical content metrics. */}
         <textarea
           ref={textareaRef}
           value={value}
           onChange={(e) => onChange(e.target.value)}
           onScroll={handleScroll}
           placeholder="在此粘贴 JWT Token..."
-          className="absolute inset-0 w-full h-full bg-transparent rounded-lg p-4 text-sm font-mono resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground caret-primary z-20 placeholder:text-muted-foreground break-all"
-          style={{ WebkitTextFillColor: 'transparent' }}
+          className="absolute inset-0 w-full h-full bg-transparent border border-transparent rounded-lg p-4 text-sm font-mono leading-5 resize-none focus:outline-none focus:ring-2 focus:ring-primary/50 text-transparent caret-primary z-20 placeholder:text-muted-foreground whitespace-pre-wrap break-all"
           spellCheck={false}
         />
       </div>
