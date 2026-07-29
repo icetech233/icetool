@@ -1,3 +1,35 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+/* 类名为 .dark 的元素下启用 dark: 变体（对应原 darkMode: 'class'） */
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * 将原 tailwind.config.ts 的 theme.extend 迁移为 v4 CSS-first 配置。
+ * 使用 `inline` 让工具类直接内联变量值；`/ <alpha-value>` 保留
+ * `bg-primary/20`、`ring-primary/50` 这类透明度修饰符的支持。
+ */
+@theme inline {
+  --color-background: hsl(var(--background) / <alpha-value>);
+  --color-foreground: hsl(var(--foreground) / <alpha-value>);
+  --color-card: hsl(var(--card) / <alpha-value>);
+  --color-card-foreground: hsl(var(--card-foreground) / <alpha-value>);
+  --color-popover: hsl(var(--popover) / <alpha-value>);
+  --color-popover-foreground: hsl(var(--popover-foreground) / <alpha-value>);
+  --color-primary: hsl(var(--primary) / <alpha-value>);
+  --color-primary-foreground: hsl(var(--primary-foreground) / <alpha-value>);
+  --color-secondary: hsl(var(--secondary) / <alpha-value>);
+  --color-secondary-foreground: hsl(var(--secondary-foreground) / <alpha-value>);
+  --color-muted: hsl(var(--muted) / <alpha-value>);
+  --color-muted-foreground: hsl(var(--muted-foreground) / <alpha-value>);
+  --color-accent: hsl(var(--accent) / <alpha-value>);
+  --color-accent-foreground: hsl(var(--accent-foreground) / <alpha-value>);
+  --color-destructive: hsl(var(--destructive) / <alpha-value>);
+  --color-destructive-foreground: hsl(var(--destructive-foreground) / <alpha-value>);
+  --color-border: hsl(var(--border) / <alpha-value>);
+  --color-input: hsl(var(--input) / <alpha-value>);
+  --color-ring: hsl(var(--ring) / <alpha-value>);
+
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
