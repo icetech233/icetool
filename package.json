@@ -16,7 +16,7 @@
     "postcss": "^8.5.23",
     "tailwindcss": "^4.3.3",
     "typescript": "^5.7.0",
-    "vite": "^7.0.0"
+    "vite": "^8.1.0"
   },
   "scripts": {
     "dev": "vite",
