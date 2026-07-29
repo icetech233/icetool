@@ -13,7 +13,24 @@ export default defineConfig({
     dedupe: ['react', 'react-dom'],
   },
   optimizeDeps: {
-    include: ['framer-motion'],
+    include: ['motion'],
+  },
+  build: {
+    target: 'es2020',
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {
+              return 'react';
+            }
+            if (/[\\/]node_modules[\\/]motion[\\/]/.test(id)) {
+              return 'motion';
+            }
+          }
+        },
+      },
+    },
   },
   server: {
     open: true,

@@ -4,7 +4,7 @@
  * 通过自定义 hook 和子组件实现了关注点分离。
  */
 import { useState } from 'react';
-import { motion, type Variants } from 'framer-motion';
+import { motion, type Variants } from 'motion/react';
 import { useJwt } from './hooks/useJwt';
 import { JwtInput } from './components/JwtInput';
 import { JwtOutput } from './components/JwtOutput';

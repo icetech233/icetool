@@ -3,7 +3,7 @@
  * It also handles the presentation of error messages or the initial "waiting for input" state.
  * This component is purely presentational, receiving all its data via props.
  */
-import { motion, AnimatePresence, type Variants } from 'framer-motion';
+import { motion, AnimatePresence, type Variants } from 'motion/react';
 
 interface JwtOutputProps {
   decoded: {
