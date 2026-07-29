@@ -1,6 +1,7 @@
 {
   "name": "JWT解码器",
   "version": "1.0.0",
+  "type": "module",
   "dependencies": {
     "react": "^19.2.8",
     "react-dom": "^19.2.8",
