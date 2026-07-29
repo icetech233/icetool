@@ -1,30 +1,30 @@
 :root {
-  /* 深色主题配色 */
-  --background: 222 47% 11%;
-  --foreground: 210 40% 98%;
-  --card: 222 47% 14%;
-  --card-foreground: 210 40% 98%;
-  --popover: 222 47% 14%;
-  --popover-foreground: 210 40% 98%;
-  --primary: 217 91% 60%;
-  --primary-foreground: 222 47% 11%;
-  --secondary: 217 33% 17%;
-  --secondary-foreground: 210 40% 98%;
-  --muted: 217 33% 17%;
-  --muted-foreground: 215 20% 65%;
-  --accent: 142 71% 45%;
-  --accent-foreground: 222 47% 11%;
+  /* 推特 (X) 浅色主题配色 */
+  --background: 200 10% 98%;       /* 推特浅灰页面背景 #f7f9f9 */
+  --foreground: 210 25% 8%;
+  --card: 0 0% 100%;
+  --card-foreground: 210 25% 8%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 210 25% 8%;
+  --primary: 204 87% 53%;         /* 推特蓝 #1d9bf0 */
+  --primary-foreground: 0 0% 100%;
+  --secondary: 204 87% 94%;       /* 浅蓝标签背景 */
+  --secondary-foreground: 204 87% 30%;
+  --muted: 180 5% 97%;            /* 浅灰背景 */
+  --muted-foreground: 206 15% 38%;
+  --accent: 142 71% 40%;
+  --accent-foreground: 142 71% 15%;
   --destructive: 0 84% 60%;
-  --destructive-foreground: 210 40% 98%;
-  --border: 217 33% 17%;
-  --input: 217 33% 20%;
-  --ring: 217 91% 60%;
+  --destructive-foreground: 0 0% 100%;
+  --border: 192 5% 94%;
+  --input: 192 5% 96%;
+  --ring: 204 87% 53%;
   --radius: 0.5rem;
 
   /* JWT 高亮颜色 */
-  --jwt-header: 45 93% 47%;      /* 琥珀色 - Header */
-  --jwt-payload: 217 91% 60%;    /* 蓝色 - Payload */
-  --jwt-signature: 142 71% 45%;  /* 绿色 - Signature */
+  --jwt-header: 35 92% 50%;      /* 琥珀色 - Header */
+  --jwt-payload: 204 87% 53%;    /* 推特蓝 - Payload */
+  --jwt-signature: 142 71% 40%;  /* 绿色 - Signature */
 }
 
 /* 基础样式 */
