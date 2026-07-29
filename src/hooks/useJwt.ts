@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Custom hook for decoding JSON Web Tokens (JWT).
  * Encapsulates the logic for parsing, decoding, and validating a JWT string.

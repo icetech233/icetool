@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * Displays the decoded JWT data, including header, payload, and signature.
  * It also handles the presentation of error messages or the initial "waiting for input" state.

@@ -1,3 +1,5 @@
+'use client';
+
 /**
  * A controlled component for JWT input.
  * It provides a textarea for user input and a synchronized, syntax-highlighted
