@@ -5,6 +5,7 @@
  */
 import { motion, AnimatePresence, type Variants } from 'motion/react';
 import { ShikiHighlighter } from 'react-shiki';
+import CopyButton from './CopyButton';
 
 interface JwtOutputProps {
   decoded: {
@@ -101,6 +102,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                   HEADER
                 </span>
                 <span className="text-xs text-muted-foreground">算法 & 类型</span>
+                <CopyButton value={decoded.header} />
               </div>
               <ShikiHighlighter
                 language="json"
@@ -120,6 +122,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                   PAYLOAD
                 </span>
                 <span className="text-xs text-muted-foreground">数据</span>
+                <CopyButton value={decoded.payload} />
               </div>
               <ShikiHighlighter
                 language="json"
@@ -139,6 +142,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                   SIGNATURE
                 </span>
                 <span className="text-xs text-muted-foreground">签名</span>
+                <CopyButton value={decoded.signature} />
               </div>
               <p className="text-xs font-mono text-muted-foreground break-all">
                 {decoded.signature}
