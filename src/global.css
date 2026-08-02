@@ -52,10 +52,10 @@
   --secondary: 204 45% 22%;        /* 低饱和深蓝标签底 */
   --secondary-foreground: 204 70% 82%;
   --muted: 210 18% 15%;            /* 次级区块背景 */
-  --muted-foreground: 205 12% 68%; /* 次级文本，对 muted 约 6.2:1 */
+  --muted-foreground: 205 12% 68%; /* 次级文本，对 muted 6.81:1 */
   --accent: 142 55% 58%;           /* 绿色提亮以满足暗底对比度 */
   --accent-foreground: 142 60% 85%;
-  --destructive: 0 82% 66%;        /* 红色提亮，对 background 约 5.3:1 */
+  --destructive: 0 82% 66%;        /* 红色提亮，对 card 5.37:1 */
   --destructive-foreground: 210 25% 8%;
   /*
    * 装饰性分隔线：WCAG 1.4.11 的 3:1 仅要求「传达信息的非文本元素」，
