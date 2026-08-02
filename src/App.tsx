@@ -8,6 +8,7 @@ import { motion, type Variants } from 'motion/react';
 import { useJwt } from './hooks/useJwt';
 import { JwtInput } from './components/JwtInput';
 import { JwtOutput } from './components/JwtOutput';
+import HeaderRight from './components/HeaderRight';
 import './global.css';
 
 const containerVariants: Variants = {
@@ -38,10 +39,16 @@ function App() {
       initial="hidden"
       animate="visible"
     >
-      {/* 标题区域 */}
-      <motion.div className="max-w-7xl mx-auto mb-8" variants={itemVariants}>
-        <h1 className="text-3xl font-bold text-primary mb-2">JWT 解码工具</h1>
-        <p className="text-muted-foreground">输入 JWT Token，实时查看解码结果</p>
+      {/* 标题区域 + 右上角工具区 */}
+      <motion.div
+        className="max-w-7xl mx-auto mb-8 flex items-center justify-between gap-4"
+        variants={itemVariants}
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-primary mb-2">JWT 解码工具</h1>
+          <p className="text-muted-foreground">输入 JWT Token，实时查看解码结果</p>
+        </div>
+        <HeaderRight />
       </motion.div>
 
       {/* 主内容区域 - 响应式布局 */}
