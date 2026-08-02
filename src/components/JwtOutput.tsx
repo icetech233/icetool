@@ -47,12 +47,12 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
         : 'success';
 
   return (
-    <div className="h-96 min-w-0">
+    <div className="min-h-96 min-w-0">
       <AnimatePresence mode="wait">
         {state === 'error' && (
           <motion.div
             key="error"
-            className="h-full flex items-center justify-center"
+            className="min-h-96 flex items-center justify-center"
             variants={stateVariants}
             initial="initial"
             animate="animate"
@@ -72,7 +72,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
         {state === 'empty' && (
           <motion.div
             key="empty"
-            className="h-full flex items-center justify-center"
+            className="min-h-96 flex items-center justify-center"
             variants={stateVariants}
             initial="initial"
             animate="animate"
@@ -88,7 +88,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
         {state === 'success' && (
           <motion.div
             key="success"
-            className="space-y-4 h-full overflow-y-auto pr-2"
+            className="space-y-4 pr-2"
             variants={listVariants}
             initial="hidden"
             animate="visible"
