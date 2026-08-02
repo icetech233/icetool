@@ -118,7 +118,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
             {/* Payload */}
             <motion.div className="bg-muted rounded-lg p-4" variants={cardVariants}>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-1 bg-secondary/20 text-secondary-foreground text-xs font-semibold rounded">
+                <span className="px-2 py-1 bg-secondary-foreground/20 text-secondary-foreground text-xs font-semibold rounded">
                   PAYLOAD
                 </span>
                 <span className="text-xs text-muted-foreground">数据</span>
@@ -138,7 +138,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
             {/* Signature */}
             <motion.div className="bg-muted rounded-lg p-4" variants={cardVariants}>
               <div className="flex items-center gap-2 mb-2">
-                <span className="px-2 py-1 bg-accent/20 text-accent-foreground text-xs font-semibold rounded">
+                <span className="px-2 py-1 bg-accent-foreground/20 text-accent-foreground text-xs font-semibold rounded">
                   SIGNATURE
                 </span>
                 <span className="text-xs text-muted-foreground">签名</span>

@@ -7,6 +7,21 @@
     <meta name="theme-color" content="#1d9bf0" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <title>JWT 解码工具</title>
+    <script>
+      // 在首次绘制前同步应用主题，避免深色用户看到白色闪屏（FOUC）。
+      (function () {
+        try {
+          var stored = localStorage.getItem('theme');
+          var isDark =
+            stored === 'dark' ||
+            (stored === null &&
+              window.matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.classList.toggle('dark', isDark);
+        } catch (e) {
+          /* localStorage 不可用时保持默认浅色 */
+        }
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

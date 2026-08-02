@@ -15,15 +15,23 @@ function HeaderRight() {
     return () => document.removeEventListener('fullscreenchange', onChange);
   }, []);
 
-  // 初始化主题：跟随系统或 localStorage
+  // 初始化主题：class 已由 index.html 的内联脚本在首绘前写入，
+  // 这里只需把 React state 同步到既有的 DOM 状态，避免二次闪烁。
   useEffect(() => {
-    const stored = localStorage.getItem('theme');
-    const prefersDark =
-      stored === 'dark' ||
-      (stored === null &&
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
-    setIsDark(prefersDark);
-    document.documentElement.classList.toggle('dark', prefersDark);
+    setIsDark(document.documentElement.classList.contains('dark'));
+  }, []);
+
+  // 跟随系统主题实时切换：仅在用户未手动指定过主题
+  // （localStorage 无 'theme' 记录）时生效，手动选择优先级更高。
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-color-scheme: dark)');
+    const onSystemChange = (e: MediaQueryListEvent) => {
+      if (localStorage.getItem('theme') !== null) return;
+      setIsDark(e.matches);
+      document.documentElement.classList.toggle('dark', e.matches);
+    };
+    media.addEventListener('change', onSystemChange);
+    return () => media.removeEventListener('change', onSystemChange);
   }, []);
 
   const toggleFullscreen = () => {
