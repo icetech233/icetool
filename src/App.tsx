@@ -45,15 +45,15 @@ function App() {
       </motion.div>
 
       {/* 主内容区域 - 响应式布局 */}
-      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6">
+      <div className="max-w-7xl mx-auto flex flex-col lg:flex-row gap-6 lg:items-stretch">
         {/* 左侧输入区 */}
-        <motion.div className="flex-1" variants={itemVariants}>
+        <motion.div className="lg:flex-1 lg:basis-0 min-w-0" variants={itemVariants}>
           <JwtInput value={jwtInput} onChange={setJwtInput} />
         </motion.div>
 
         {/* 右侧解码区 */}
         <motion.div
-          className="flex-1 bg-card rounded-xl border border-border p-6 shadow-sm"
+          className="lg:flex-1 lg:basis-0 min-w-0 bg-card rounded-xl border border-border p-6 shadow-sm"
           variants={itemVariants}
         >
           <h2 className="text-sm font-medium text-foreground mb-3">解码结果</h2>

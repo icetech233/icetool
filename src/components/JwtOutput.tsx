@@ -47,7 +47,7 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
         : 'success';
 
   return (
-    <div className="h-96">
+    <div className="h-96 min-w-0">
       <AnimatePresence mode="wait">
         {state === 'error' && (
           <motion.div
