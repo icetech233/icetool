@@ -16,16 +16,6 @@
   background-color: var(--shiki-dark-bg);
 }
 
-/*
- * 将原 tailwind.config.ts 的 theme.extend 迁移为 v4 CSS-first 配置。
- *
- * 注意：token（--background 等）保存的是裸 HSL 通道值（如 `204 87% 53%`），
- * 这里必须用 `hsl(... / var(--tw-bg-opacity, 1))` 形式包裹，
- * 而不能写成 `hsl(var(--x))`。后者是一个「已完成」的颜色值，
- * Tailwind v4 无法再向其中注入 alpha，会导致 `bg-primary/20`、
- * `ring-primary/50` 这类带透明度修饰符的工具类被静默丢弃（不生成任何 CSS）。
- * 采用相对颜色语法 `hsl(from ...)` 可让所有 token 同时支持透明度修饰符。
- */
 @theme inline {
   --color-background: hsl(var(--background) / 100%);
   --color-foreground: hsl(var(--foreground) / 100%);
