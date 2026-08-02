@@ -61,7 +61,7 @@ export function JwtInput({ value, onChange }: JwtInputProps) {
         <div
           ref={highlightRef}
           aria-hidden="true"
-          className="absolute inset-0 w-full h-full bg-input border border-border rounded-lg p-4 text-sm font-mono leading-5 pointer-events-none overflow-hidden whitespace-pre-wrap break-all z-10"
+          className="absolute inset-0 w-full h-full bg-input border border-border-strong rounded-lg p-4 text-sm font-mono leading-5 pointer-events-none overflow-hidden whitespace-pre-wrap break-all z-10"
         >
           {renderHighlightedJWT(value)}
         </div>

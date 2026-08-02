@@ -17,6 +17,7 @@
   --destructive: 0 84% 60%;
   --destructive-foreground: 0 0% 100%;
   --border: 192 5% 94%;
+  --border-strong: 200 8% 56%;    /* 承载状态的边框，对 card 3.20:1、对 background 3.06:1 */
   --input: 192 5% 96%;
   --ring: 204 87% 53%;
   --radius: 0.5rem;
@@ -41,12 +42,12 @@
  */
 .dark {
   --background: 210 25% 8%;        /* 近黑蓝灰页面背景 #0f1419 系 */
-  --foreground: 200 12% 93%;       /* 主文本，对 background 约 15:1 */
+  --foreground: 200 12% 93%;       /* 主文本，对 background 15.81:1 */
   --card: 210 22% 11%;             /* 卡片略高于页面背景 */
   --card-foreground: 200 12% 93%;
   --popover: 210 22% 11%;
   --popover-foreground: 200 12% 93%;
-  --primary: 204 88% 60%;          /* 推特蓝提亮，对 background 约 6.4:1 */
+  --primary: 204 88% 60%;          /* 推特蓝提亮，对 background 7.31:1 */
   --primary-foreground: 210 25% 8%;
   --secondary: 204 45% 22%;        /* 低饱和深蓝标签底 */
   --secondary-foreground: 204 70% 82%;
@@ -56,7 +57,13 @@
   --accent-foreground: 142 60% 85%;
   --destructive: 0 82% 66%;        /* 红色提亮，对 background 约 5.3:1 */
   --destructive-foreground: 210 25% 8%;
-  --border: 208 14% 34%;           /* 分隔线，对 card 3.06:1（非文本 AA） */
+  /*
+   * 装饰性分隔线：WCAG 1.4.11 的 3:1 仅要求「传达信息的非文本元素」，
+   * 纯分隔用途不在其列，故取较低亮度以贴合暗色 UI 观感。
+   * 承载状态的边框（如输入框轮廓）请改用 --border-strong。
+   */
+  --border: 208 15% 26%;
+  --border-strong: 208 14% 41%;    /* 对 card 3.06:1、对 background 3.29:1 */
   --input: 210 20% 13%;            /* 输入框底色 */
   --ring: 204 88% 60%;
 
