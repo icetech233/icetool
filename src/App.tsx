@@ -3,13 +3,17 @@
  * 提供响应式布局，并协调 JWT 输入、解码和输出显示。
  * 通过自定义 hook 和子组件实现了关注点分离。
  */
-import { useState } from 'react';
+import { lazy, Suspense, useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { useJwt } from './hooks/useJwt';
 import { JwtInput } from './components/JwtInput';
-import { JwtOutput } from './components/JwtOutput';
 import HeaderRight from './components/HeaderRight';
 import './global.css';
+
+// 把依赖 Shiki 高亮引擎的组件按需懒加载，避免其（数百 kB）被打入首屏主包。
+const JwtOutput = lazy(() =>
+  import('./components/JwtOutput').then((m) => ({ default: m.JwtOutput })),
+);
 
 const containerVariants: Variants = {
   hidden: { opacity: 0 },
@@ -64,7 +68,9 @@ function App() {
           variants={itemVariants}
         >
           <h2 className="text-sm font-medium text-foreground mb-3">解码结果</h2>
-          <JwtOutput decoded={decoded} />
+          <Suspense fallback={<div className="min-h-96" />}>
+            <JwtOutput decoded={decoded} />
+          </Suspense>
         </motion.div>
       </div>
     </motion.div>

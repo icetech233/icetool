@@ -3,8 +3,13 @@
  * It also handles the presentation of error messages or the initial "waiting for input" state.
  * This component is purely presentational, receiving all its data via props.
  */
+import { useEffect, useState } from 'react';
 import { motion, AnimatePresence, type Variants } from 'motion/react';
-import { ShikiHighlighter } from 'react-shiki';
+import {
+  ShikiHighlighter,
+  createHighlighterCore,
+  createJavaScriptRegexEngine,
+} from 'react-shiki/core';
 import CopyButton from './CopyButton';
 
 interface JwtOutputProps {
@@ -40,6 +45,29 @@ const cardVariants: Variants = {
 };
 
 export function JwtOutput({ decoded }: JwtOutputProps) {
+  // 仅按需加载 json 语言与 github 主题，使用 JS 正则引擎（体积小、启动快），
+  // 避免引入全量 Shiki bundle（含所有语言/主题，体积 >9MB）。
+  const [highlighter, setHighlighter] = useState<Awaited<
+    ReturnType<typeof createHighlighterCore>
+  > | null>(null);
+
+  useEffect(() => {
+    let disposed = false;
+    createHighlighterCore({
+      themes: [
+        import('@shikijs/themes/github-light'),
+        import('@shikijs/themes/github-dark'),
+      ],
+      langs: [import('@shikijs/langs/json')],
+      engine: createJavaScriptRegexEngine(),
+    }).then((hl) => {
+      if (!disposed) setHighlighter(hl);
+    });
+    return () => {
+      disposed = true;
+    };
+  }, []);
+
   const state: 'error' | 'empty' | 'success' =
     decoded.error
       ? 'error'
@@ -104,15 +132,18 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                 <span className="text-xs text-muted-foreground">算法 & 类型</span>
                 <CopyButton value={decoded.header} />
               </div>
-              <ShikiHighlighter
-                language="json"
-                theme={{ light: 'github-light', dark: 'github-dark' }}
-                defaultColor={false}
-                addDefaultStyles={false}
-                className="text-xs font-mono overflow-x-auto rounded-md"
-              >
-                {decoded.header ?? ''}
-              </ShikiHighlighter>
+              {highlighter && (
+                <ShikiHighlighter
+                  highlighter={highlighter}
+                  language="json"
+                  theme={{ light: 'github-light', dark: 'github-dark' }}
+                  defaultColor={false}
+                  addDefaultStyles={false}
+                  className="text-xs font-mono overflow-x-auto rounded-md"
+                >
+                  {decoded.header ?? ''}
+                </ShikiHighlighter>
+              )}
             </motion.div>
 
             {/* Payload */}
@@ -124,15 +155,18 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                 <span className="text-xs text-muted-foreground">数据</span>
                 <CopyButton value={decoded.payload} />
               </div>
-              <ShikiHighlighter
-                language="json"
-                theme={{ light: 'github-light', dark: 'github-dark' }}
-                defaultColor={false}
-                addDefaultStyles={false}
-                className="text-xs font-mono overflow-x-auto rounded-md"
-              >
-                {decoded.payload ?? ''}
-              </ShikiHighlighter>
+              {highlighter && (
+                <ShikiHighlighter
+                  highlighter={highlighter}
+                  language="json"
+                  theme={{ light: 'github-light', dark: 'github-dark' }}
+                  defaultColor={false}
+                  addDefaultStyles={false}
+                  className="text-xs font-mono overflow-x-auto rounded-md"
+                >
+                  {decoded.payload ?? ''}
+                </ShikiHighlighter>
+              )}
             </motion.div>
 
             {/* Signature */}

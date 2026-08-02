@@ -27,6 +27,10 @@ export default defineConfig({
             if (/[\\/]node_modules[\\/]motion[\\/]/.test(id)) {
               return 'motion';
             }
+            // Shiki 高亮引擎体积大，单独拆包并由懒加载组件按需引入。
+            if (/[\\/]node_modules[\\/](shiki|@shikijs)[\\/]/.test(id)) {
+              return 'shiki';
+            }
           }
         },
       },
