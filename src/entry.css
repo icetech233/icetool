@@ -3,6 +3,19 @@
 /* 类名为 .dark 的元素下启用 dark: 变体（对应原 darkMode: 'class'） */
 @custom-variant dark (&:is(.dark *));
 
+/* Shiki dual-theme: 在 .dark 容器下应用暗色变量 */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+.dark .shiki,
+.dark .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
+}
+
 /*
  * 将原 tailwind.config.ts 的 theme.extend 迁移为 v4 CSS-first 配置。
  * 使用 `inline` 让工具类直接内联变量值；`/ <alpha-value>` 保留

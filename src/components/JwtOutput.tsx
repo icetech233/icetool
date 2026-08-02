@@ -4,6 +4,7 @@
  * This component is purely presentational, receiving all its data via props.
  */
 import { motion, AnimatePresence, type Variants } from 'motion/react';
+import { ShikiHighlighter } from 'react-shiki';
 
 interface JwtOutputProps {
   decoded: {
@@ -101,9 +102,15 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                 </span>
                 <span className="text-xs text-muted-foreground">算法 & 类型</span>
               </div>
-              <pre className="text-xs font-mono text-foreground overflow-x-auto">
-                {decoded.header}
-              </pre>
+              <ShikiHighlighter
+                language="json"
+                theme={{ light: 'github-light', dark: 'github-dark' }}
+                defaultColor={false}
+                addDefaultStyles={false}
+                className="text-xs font-mono overflow-x-auto rounded-md"
+              >
+                {decoded.header ?? ''}
+              </ShikiHighlighter>
             </motion.div>
 
             {/* Payload */}
@@ -114,9 +121,15 @@ export function JwtOutput({ decoded }: JwtOutputProps) {
                 </span>
                 <span className="text-xs text-muted-foreground">数据</span>
               </div>
-              <pre className="text-xs font-mono text-foreground overflow-x-auto">
-                {decoded.payload}
-              </pre>
+              <ShikiHighlighter
+                language="json"
+                theme={{ light: 'github-light', dark: 'github-dark' }}
+                defaultColor={false}
+                addDefaultStyles={false}
+                className="text-xs font-mono overflow-x-auto rounded-md"
+              >
+                {decoded.payload ?? ''}
+              </ShikiHighlighter>
             </motion.div>
 
             {/* Signature */}
