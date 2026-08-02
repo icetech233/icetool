@@ -112,3 +112,15 @@ body {
   background-color: hsl(var(--primary) / 0.3);
   color: hsl(var(--primary-foreground));
 }
+
+.text-jwt-header {
+  color: hsl(var(--jwt-header));
+}
+
+.text-jwt-payload {
+  color: hsl(var(--jwt-payload));
+}
+
+.text-jwt-signature {
+  color: hsl(var(--jwt-signature));
+}

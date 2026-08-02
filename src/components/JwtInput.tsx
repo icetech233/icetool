@@ -28,11 +28,11 @@ const renderHighlightedJWT = (jwtInput: string) => {
 
   return (
     <>
-      <span className="text-[hsl(var(--jwt-header))]">{parts[0]}</span>
+      <span className="text-jwt-header">{parts[0]}</span>
       <span className="text-foreground">.</span>
-      <span className="text-[hsl(var(--jwt-payload))]">{parts[1]}</span>
+      <span className="text-jwt-payload">{parts[1]}</span>
       <span className="text-foreground">.</span>
-      <span className="text-[hsl(var(--jwt-signature))]">{parts[2]}</span>
+      <span className="text-jwt-signature">{parts[2]}</span>
     </>
   );
 };

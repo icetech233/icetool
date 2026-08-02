@@ -91,7 +91,7 @@ jwtparse/
 - **职责**：
   - 渲染 `<textarea>` 供用户输入；通过受控 `value` / `onChange` 与父组件 `App` 双向同步。
   - 叠放一个同步滚动的 `<div>` 高亮层：`renderHighlightedJWT` 将 JWT 按 `.` 拆分，分别对
-    Header / Payload / Signature 着色（颜色取自 `--jwt-*` CSS 变量，通过 `text-[hsl(var(--jwt-...))]` 引用），分隔点 `.` 用前景色。
+    Header / Payload / Signature 着色（颜色取自 `--jwt-*`（如 `--jwt-header`）CSS 变量，通过 `text-[hsl(var(--jwt-header))]` 这类任意值类名引用），分隔点 `.` 用前景色。
   - 文本域文字透明（`text-transparent` + 透明边框）、`caret-primary` 保留光标，可见字形由高亮层呈现；滚动通过 `handleScroll` 同步两者 `scrollTop/scrollLeft`，实现像素级对齐。
 
 ### 4. `JwtOutput.tsx`（JWT 输出组件，懒加载）
