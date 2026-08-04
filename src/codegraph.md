@@ -7,13 +7,18 @@
 项目采用现代化构建工具链（Vite 8）与 Tailwind CSS v4，通过自定义 Hook 与展示组件分离关注点，
 代码结构清晰、易于维护。UI 采用推特（X）风格的明/暗双主题，支持本地解析、数据不出浏览器。
 
+项目已从单页布局改造为**路由驱动的多页应用架构**：引入 `react-router-dom` 路由层，
+`App.tsx` 退化为布局壳（`Sidebar` + `HeaderRight` + `<Outlet />`），
+原 JWT 功能抽离为独立页面 `JwtDecodePage`，后续新增功能只需追加路由与页面组件。
+
 ## 技术栈
 
 - **框架**：React 19（`react` / `react-dom`），函数组件 + Hooks。
 - **构建工具**：Vite 8（`vite` + `@vitejs/plugin-react`），脚本见 `package.json`（`dev` / `build` / `preview` / `typecheck` / `lint`）。
 - **样式方案**：Tailwind CSS v4（`@tailwindcss/postcss` + `tailwindcss`），采用 CSS-first 配置（无 `tailwind.config.ts`）。
 - **语言**：TypeScript 7（`tsconfig.json`，`strict` + `noUnusedLocals` 等全开）。
-- **动画**：`motion`（即 `framer-motion` 的新包名，`^12.43.0`），从 `motion/react` 导入；用于 `App`（标题/卡片入场 stagger）与 `JwtOutput`（状态切换 `AnimatePresence` + 解码卡片错落入场，错误态抖动）。
+- **路由**：`react-router-dom`（`^7.18`），`createBrowserRouter` + `RouterProvider`，路由表位于 `router.tsx`，`/` 根路由挂载布局壳，子路由懒加载各功能页面。
+- **动画**：`motion`（即 `framer-motion` 的新包名，`^12.43.0`），从 `motion/react` 导入；用于 `App`（标题/卡片入场 stagger）与 `JwtOutput`（状态切换 `AnimatePresence` + 解码卡片错落入场，错误态抖动），以及 `Sidebar` 菜单项入场动画。
 - **语法高亮**：`react-shiki`（`^0.11.0`）+ 按需加载的 Shiki 引擎（`@shikijs/langs/json`、`@shikijs/themes/github-light|dark`），用于解码后 JSON 的彩色展示。
 
 ## 文件结构与模块职责
@@ -27,17 +32,22 @@ jwtparse/
 ├── index.html              # HTML 模板（含首绘前同步主题的内联脚本）
 ├── bun.lock                # Bun 依赖锁文件
 └── src/
-    ├── entry.tsx           # 应用入口，挂载 <App /> 到 DOM（StrictMode）
+    ├── entry.tsx           # 应用入口，挂载 <RouterProvider router={router} /> 到 DOM（StrictMode）
     ├── entry.css           # Tailwind 引入 + @theme 变量映射 + Shiki 双主题样式
     ├── global.css          # 全局样式：明/暗双主题 CSS 变量、滚动条、选中样式
     ├── vite-env.d.ts       # Vite 类型声明
-    ├── App.tsx             # 主组件：布局容器 + 状态协调 + 入场动画
+    ├── App.tsx             # 布局壳：Sidebar + 顶部 HeaderRight + <Outlet />（Suspense 兜底）
+    ├── router.tsx          # 路由表定义（/ → /jwt 重定向，/jwt /base64 /url 子路由）
     ├── codegraph.md        # 本文档
     ├── components/
+    │   ├── Sidebar.tsx     # 左侧菜单栏（桌面固定 w-56，移动端折叠为汉堡菜单 + 下拉）
     │   ├── JwtInput.tsx    # JWT 输入组件（文本域 + 实时语法高亮叠层）
     │   ├── JwtOutput.tsx   # JWT 解码结果展示组件（懒加载，Shiki 高亮）
     │   ├── CopyButton.tsx  # 通用复制按钮（写剪贴板 + 复制反馈）
     │   └── HeaderRight.tsx # 页面右上角工具区（全屏 / 通知 / 用户 / 主题 / 设置）
+    ├── pages/
+    │   ├── JwtDecodePage.tsx  # JWT 解码功能页（从原 App.tsx 抽出，保留 useJwt + JwtInput/JwtOutput）
+    │   └── ComingSoonPage.tsx # 未来功能占位页
     └── hooks/
         └── useJwt.ts       # JWT 解码核心逻辑 Hook
 ```
@@ -63,15 +73,12 @@ jwtparse/
 
 ## 核心组件与数据流
 
-### 1. `App.tsx`（主应用组件）
+### 1. `App.tsx`（应用布局壳）
 
 - **职责**：
-  - 应用根组件与响应式布局容器（大屏左右分栏 `lg:flex-row`，小屏上下堆叠 `flex-col`）。
-  - 通过 `useState` 维护核心状态 `jwtInput`（用户输入的 JWT 字符串）。
-  - 调用 `useJwt(jwtInput)` 获取解码结果 `decoded`。
-  - 使用 `motion` 的 `containerVariants` / `itemVariants` 实现标题与左右卡片的入场 stagger 弹簧动画。
-  - `JwtOutput` 通过 `lazy()` + `Suspense` 懒加载（避免在首屏主包打入数百 kB 的 Shiki）。
-- **数据流**：`App` → `JwtInput`（受控 value/onChange）/ `JwtOutput`（decoded）/ `HeaderRight`（独立状态）。
+  - 应用根布局组件：`Sidebar`（左侧菜单）+ 顶部 `HeaderRight`（右上角工具区）+ `<Outlet />`（路由内容出口）。
+  - 不再持有任何业务状态（`jwtInput` 等已下放到 `JwtDecodePage`），仅负责页面结构编排。
+  - 外层包裹 `<Suspense>` 兜底路由懒加载的 loading 状态。
 
 ### 2. `useJwt.ts`（JWT 解码 Hook）
 
@@ -122,23 +129,62 @@ jwtparse/
     并在用户未手动指定主题（`localStorage` 无记录）时跟随系统 `prefers-color-scheme` 实时切换。
   - **设置**：装饰性齿轮按钮。
 
+### 7. `Sidebar.tsx`（左侧菜单栏）
+
+- **职责**：
+  - 桌面端固定宽度 `w-56` 侧边栏，带品牌标识「JWT Tools」；移动端折叠为顶部条 + 汉堡按钮，点击展开下拉菜单。
+  - 菜单项由 `menuItems` 数组配置（`{ path, label, icon }`），后续新增功能只需追加一项。
+  - 使用 `NavLink` 自动根据当前路由高亮激活项（`isActive` 切换 `bg-muted text-foreground`）。
+  - 菜单项入场使用 `motion` 的 stagger 动画（`listVariants` / `itemVariants`）。
+  - 复用现有 CSS 变量（`bg-card`、`text-muted-foreground`、`ring-ring` 等），自动适配明暗主题。
+
+### 8. `router.tsx`（路由表）
+
+- **职责**：
+  - 使用 `createBrowserRouter` 定义路由：`/` 根路径挂载 `App` 布局壳，子路由通过 `<Outlet />` 渲染。
+  - 根路径 `/` 与 404 通配 `*` 均重定向到 `/jwt`。
+  - 每个功能页面通过 `lazy()` 懒加载，配合 `App.tsx` 的 `<Suspense>` 边界，实现代码分包。
+
+### 9. `JwtDecodePage.tsx`（JWT 解码功能页）
+
+- **职责**：
+  - 从原 `App.tsx` 抽出，持有 `jwtInput` 状态，调用 `useJwt` Hook，协调 `JwtInput` / `JwtOutput` 的渲染。
+  - 保留 `containerVariants` / `itemVariants` 入场 stagger 动画。
+  - `JwtOutput` 仍通过 `lazy()` 懒加载，避免将 Shiki 打入功能页主包。
+
+### 10. `ComingSoonPage.tsx`（未来功能占位页）
+
+- **职责**：装饰性占位页面，居中显示图标与「功能开发中」提示，供 `/base64`、`/url` 等未实现的路由使用。
+
 ## 模块依赖关系图
 
 ```
 [index.html] ──内联脚本──> 首绘前写入 <html class="dark">（防闪屏）
-[index.html] ──加载──> [entry.tsx] ──挂载──> [App.tsx]
+[index.html] ──加载──> [entry.tsx] ──挂载──> [RouterProvider → router.tsx]
 
-[App.tsx]  ── 导入  ──> [useJwt.ts]        (Hook，纯逻辑)
+[router.tsx] ──createBrowserRouter──> [App.tsx]  (布局壳)
+    │
+    ├── / ──重定向──> /jwt
+    ├── /jwt ──lazy──> [JwtDecodePage.tsx]
+    ├── /base64 ──lazy──> [ComingSoonPage.tsx]
+    └── /url ──lazy──> [ComingSoonPage.tsx]
+
+[App.tsx]  ── 布局  ──> [Sidebar.tsx]  (左侧菜单，NavLink 驱动路由跳转)
+    │                     └── menuItems 数组配置（{ path, label, icon }）
+    ├── <Outlet /> ── 渲染当前路由页面
+    └── HeaderRight.tsx   (独立状态：全屏 / 主题 / 等)
+
+[JwtDecodePage.tsx]  ── 导入  ──> [useJwt.ts]        (Hook，纯逻辑)
     │
     ├── 导入 ──> [JwtInput.tsx]     (展示组件，受控输入 + 高亮叠层)
-    ├── lazy ──> [JwtOutput.tsx]    (展示组件，Shiki 高亮 + 状态动画)
-    │                └── 导入 ──> [CopyButton.tsx]
-    └── 导入 ──> [HeaderRight.tsx]  (独立状态：全屏 / 主题 / 等)
+    └── lazy ──> [JwtOutput.tsx]    (展示组件，Shiki 高亮 + 状态动画)
+                     └── 导入 ──> [CopyButton.tsx]
 
 [global.css]  ──由──> [entry.css] 通过 @theme 映射为 Tailwind 工具类，被各组件 className 引用
 ```
 
-- `App.tsx` 是中心协调者，持有唯一可变输入状态 `jwtInput`。
+- `router.tsx` 是路由入口，`App.tsx` 退化为布局壳，不再持有业务状态。
+- `JwtDecodePage.tsx` 作为 JWT 功能页，持有 `jwtInput` 状态并协调 `useJwt` / `JwtInput` / `JwtOutput`。
 - `useJwt.ts` 封装全部解码业务逻辑，与 UI 解耦。
 - `JwtInput.tsx`、`JwtOutput.tsx`、`CopyButton.tsx`、`HeaderRight.tsx` 为展示/交互组件，
   `JwtInput` 与 `HeaderRight` 不直接持有 JWT 状态，`JwtOutput` 仅消费 `decoded` Prop。
@@ -157,3 +203,4 @@ jwtparse/
 - **类型安全**：`tsconfig.json` 开启 `strict`、`noUnusedLocals`、`noUnusedParameters`、`noFallthroughCasesInSwitch`、`forceConsistentCasingInFileNames`。
 - **构建优化**：`vite.config.ts` 用 `manualChunks` 将 react / motion / shiki 拆为独立 chunk，Shiki 由 `JwtOutput` 懒加载。
 - **高亮叠层稳健性**：`JwtInput` 用 `text-transparent`（跨浏览器隐藏真实文字）+ 透明边框 + `caret-primary`，与高亮层实现像素级对齐。
+- **菜单布局改造**：引入 `react-router-dom` 路由层，新增 `router.tsx`（路由表）、`Sidebar.tsx`（左侧菜单栏，桌面固定 w-56 / 移动端汉堡折叠）、`pages/JwtDecodePage.tsx`（原 JWT 功能从 App.tsx 抽出）、`pages/ComingSoonPage.tsx`（未来功能占位页）；`App.tsx` 退化为布局壳（`Sidebar` + `HeaderRight` + `<Outlet />`），`entry.tsx` 改用 `RouterProvider` 挂载；菜单项由 `menuItems` 数组配置，后续新增功能只需追加路由与菜单项。
