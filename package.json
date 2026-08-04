@@ -4,9 +4,6 @@
   "private": true,
   "type": "module",
   "description": "在线 JWT 解码工具",
-  "engines": {
-    "node": ">=20"
-  },
   "dependencies": {
     "motion": "^12.43.0",
     "react": "^19.2.8",
