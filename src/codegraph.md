@@ -43,13 +43,18 @@ jwtparse/
     │   ├── Sidebar.tsx     # 左侧菜单栏（桌面固定 w-56，移动端折叠为汉堡菜单 + 下拉）
     │   ├── JwtInput.tsx    # JWT 输入组件（文本域 + 实时语法高亮叠层）
     │   ├── JwtOutput.tsx   # JWT 解码结果展示组件（懒加载，Shiki 高亮）
+    │   ├── CodecView.tsx   # 通用「编解码」双栏视图（编/解模式 + 变体切换 + 三态动画，供 Base64/URL 复用）
     │   ├── CopyButton.tsx  # 通用复制按钮（写剪贴板 + 复制反馈）
     │   └── HeaderRight.tsx # 页面右上角工具区（全屏 / 通知 / 用户 / 主题 / 设置）
     ├── pages/
     │   ├── JwtDecodePage.tsx  # JWT 解码功能页（从原 App.tsx 抽出，保留 useJwt + JwtInput/JwtOutput）
-    │   └── ComingSoonPage.tsx # 未来功能占位页
-    └── hooks/
-        └── useJwt.ts       # JWT 解码核心逻辑 Hook
+    │   ├── Base64Page.tsx     # Base64 编解码功能页（注入 encode/decode + URL-safe 变体）
+    │   └── UrlCodecPage.tsx   # URL 编解码功能页（注入 encode/decode + Component/URI 变体）
+    ├── hooks/
+    │   └── useJwt.ts          # JWT 解码核心逻辑 Hook
+    └── utils/
+        ├── base64.ts          # UTF-8 安全的 Base64 编解码（含 URL-safe 变体、错误分类）
+        └── urlCodec.ts        # URL 编解码（Component / URI 两种粒度）
 ```
 
 ### 样式系统（Tailwind v4 CSS-first）
@@ -152,9 +157,24 @@ jwtparse/
   - 保留 `containerVariants` / `itemVariants` 入场 stagger 动画。
   - `JwtOutput` 仍通过 `lazy()` 懒加载，避免将 Shiki 打入功能页主包。
 
-### 10. `ComingSoonPage.tsx`（未来功能占位页）
+### 10. `CodecView.tsx`（通用编解码视图）
 
-- **职责**：装饰性占位页面，居中显示图标与「功能开发中」提示，供 `/base64`、`/url` 等未实现的路由使用。
+- **职责**：
+  - 供 Base64、URL 等文本级编解码工具复用的双栏视图。调用方注入 `encode(input, variant)` / `decode(input, variant)` 两个纯函数（错误情况直接抛异常，由视图统一捕获展示），以及可选的 `variants` 描述子模式。
+  - 顶部工具条：`编码 / 解码` 模式切换、变体切换（可选）、清空输入、`交换`（把当前输出灌回输入并翻转方向）。
+  - 左列：受控 `<textarea>`；右列：结果展示区，按 `error / empty / success` 三态 `AnimatePresence` 切换，错误态含抖动，成功态附 `CopyButton` 与长度提示。
+  - 结果由 `useMemo(direction, encode, decode, input, variant)` 同步派生，与 `useJwt` 思路一致，无冗余渲染。
+
+### 11. `Base64Page.tsx` / `UrlCodecPage.tsx`（编解码功能页）
+
+- **`Base64Page`**：包装 `CodecView`，注入 `utils/base64.ts` 的 `encodeBase64` / `decodeBase64`，暴露「标准 / URL-safe」两种变体（解码时自动兼容两种字符集，无需区分）。
+- **`UrlCodecPage`**：包装 `CodecView`，注入 `utils/urlCodec.ts` 的 `encodeUrl` / `decodeUrl`，暴露「Component / URI」两种粒度（分别对应 `encodeURIComponent` 与 `encodeURI`）。
+- 两个页面都通过 `router.tsx` 中的 `lazy()` 懒加载，控制主包体积。
+
+### 12. `utils/base64.ts` / `utils/urlCodec.ts`（编解码工具函数）
+
+- **`base64.ts`**：`encodeBase64(text, urlSafe?)` 以 `TextEncoder` 得到 UTF-8 字节后走 `btoa`，可选输出 URL-safe 变体（`-` `_` 替换 `+` `/`，去除末尾 `=`）；`decodeBase64(input)` 去空白、把 URL-safe 字符集归一化回标准字符集、按 4 字节自动补 `=`，对字符集与结构、UTF-8 三类错误分别抛出可读消息。
+- **`urlCodec.ts`**：`encodeUrl(text, mode)` / `decodeUrl(text, mode)`，`mode` 为 `'component' | 'uri'`；解码遇到损坏的百分号转义时抛出可读错误。
 
 ## 模块依赖关系图
 
@@ -166,8 +186,8 @@ jwtparse/
     │
     ├── / ──重定向──> /jwt
     ├── /jwt ──lazy──> [JwtDecodePage.tsx]
-    ├── /base64 ──lazy──> [ComingSoonPage.tsx]
-    └── /url ──lazy──> [ComingSoonPage.tsx]
+    ├── /base64 ──lazy──> [Base64Page.tsx] ──> [CodecView.tsx] + [utils/base64.ts]
+    └── /url    ──lazy──> [UrlCodecPage.tsx] ──> [CodecView.tsx] + [utils/urlCodec.ts]
 
 [App.tsx]  ── 布局  ──> [Sidebar.tsx]  (左侧菜单，NavLink 驱动路由跳转)
     │                     └── menuItems 数组配置（{ path, label, icon }）
@@ -204,3 +224,4 @@ jwtparse/
 - **构建优化**：`vite.config.ts` 用 `manualChunks` 将 react / motion / shiki 拆为独立 chunk，Shiki 由 `JwtOutput` 懒加载。
 - **高亮叠层稳健性**：`JwtInput` 用 `text-transparent`（跨浏览器隐藏真实文字）+ 透明边框 + `caret-primary`，与高亮层实现像素级对齐。
 - **菜单布局改造**：引入 `react-router-dom` 路由层，新增 `router.tsx`（路由表）、`Sidebar.tsx`（左侧菜单栏，桌面固定 w-56 / 移动端汉堡折叠）、`pages/JwtDecodePage.tsx`（原 JWT 功能从 App.tsx 抽出）、`pages/ComingSoonPage.tsx`（未来功能占位页）；`App.tsx` 退化为布局壳（`Sidebar` + `HeaderRight` + `<Outlet />`），`entry.tsx` 改用 `RouterProvider` 挂载；菜单项由 `menuItems` 数组配置，后续新增功能只需追加路由与菜单项。
+- **Base64 / URL 编解码功能页**：新增 `pages/Base64Page.tsx`、`pages/UrlCodecPage.tsx` 与共享的 `components/CodecView.tsx`；工具函数抽到 `utils/base64.ts`、`utils/urlCodec.ts`。原 `ComingSoonPage.tsx` 已删除，路由表切换到真实页面。`CodecView` 沿用 `useMemo` 同步派生思路，结果按 `error / empty / success` 三态呈现，与 JWT 页视觉风格统一。

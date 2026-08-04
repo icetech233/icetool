@@ -3,7 +3,8 @@ import { createBrowserRouter, Navigate } from 'react-router-dom';
 import App from './App';
 
 const JwtDecodePage = lazy(() => import('./pages/JwtDecodePage'));
-const ComingSoonPage = lazy(() => import('./pages/ComingSoonPage'));
+const Base64Page = lazy(() => import('./pages/Base64Page'));
+const UrlCodecPage = lazy(() => import('./pages/UrlCodecPage'));
 
 export const router = createBrowserRouter([
   {
@@ -12,8 +13,8 @@ export const router = createBrowserRouter([
     children: [
       { index: true, element: <Navigate to="/jwt" replace /> },
       { path: 'jwt', element: <JwtDecodePage /> },
-      { path: 'base64', element: <ComingSoonPage /> },
-      { path: 'url', element: <ComingSoonPage /> },
+      { path: 'base64', element: <Base64Page /> },
+      { path: 'url', element: <UrlCodecPage /> },
       { path: '*', element: <Navigate to="/jwt" replace /> },
     ],
   },
