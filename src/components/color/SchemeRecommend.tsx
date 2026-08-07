@@ -51,7 +51,7 @@ export default function SchemeRecommend({
                 type="button"
                 onClick={() => onApplyScheme(s.colors)}
                 className="rounded-md px-2 py-1 text-[11px] text-muted-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                title="应用整组到灵感墙"
+                title="应用首色到当前主色"
               >
                 应用
               </button>

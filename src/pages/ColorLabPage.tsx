@@ -35,7 +35,6 @@ export default function ColorLabPage() {
   const actions = useColorLabActions();
   const [toolTab, setToolTab] = useState<ToolTab>('standard');
   const [refreshKey, setRefreshKey] = useState(0);
-  const [injectedScheme, setInjectedScheme] = useState<string[] | undefined>(undefined);
   const lastHistoryHex = useRef<string>('');
 
   // 主色变化时写入历史（去重由 pushHistory 处理短时重复）
@@ -73,10 +72,13 @@ export default function ColorLabPage() {
     [actions, bumpRefresh],
   );
 
-  const handleApplyScheme = useCallback((colors: string[]) => {
-    setInjectedScheme(colors);
-    window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
-  }, []);
+  const handleApplyScheme = useCallback(
+    (colors: string[]) => {
+      handlePick(colors[0]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    [handlePick],
+  );
 
   const TABS: { key: ToolTab; label: string }[] = [
     { key: 'standard', label: '标准色表' },
@@ -158,7 +160,6 @@ export default function ColorLabPage() {
               <InspirationWall
                 onApplyScheme={handleApplyScheme}
                 onFavoriteScheme={handleFavoriteScheme}
-                injected={injectedScheme}
               />
             </Card>
           </div>

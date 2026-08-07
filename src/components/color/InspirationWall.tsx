@@ -1,8 +1,8 @@
 /**
  * InspirationWall —— 随机灵感墙（方案 B：瀑布流）。
- * - 一键生成多张随机配色卡片（masonry 瀑布流布局）。
+ * - 一键生成多张随机配色卡片（masonry 瀑布流布局，固定 2 列）。
+ * - 每次生成 8-12 张，避免太少/太多。
  * - 每张卡片可「应用首色」或「收藏整组」。
- * - 桌面 3 列、平板 2 列、移动 1 列自适应。
  * 复用 convert.ts 的 generateHarmony / randomHex / HARMONY_LABEL_MAP。
  */
 import { useCallback, useState } from 'react';
@@ -18,8 +18,6 @@ type WallCard = {
 type InspirationWallProps = {
   onApplyScheme: (colors: string[]) => void;
   onFavoriteScheme: (colors: string[], scheme: HarmonyType) => void;
-  /** 外部注入的预设方案（来自配色推荐「应用」按钮） */
-  injected?: string[];
 };
 
 const TYPES: HarmonyType[] = [
@@ -35,60 +33,40 @@ const gradient = (colors: string[]) => `linear-gradient(135deg, ${colors.join(',
 export default function InspirationWall({
   onApplyScheme,
   onFavoriteScheme,
-  injected,
 }: InspirationWallProps) {
   const [cards, setCards] = useState<WallCard[]>([]);
 
-  const generate = useCallback(
-    (count = 6) => {
-      const next: WallCard[] = [];
-      for (let i = 0; i < count; i++) {
-        const type = TYPES[Math.floor(Math.random() * TYPES.length)];
-        const base = randomHex();
-        next.push({ id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`, type, colors: generateHarmony(base, type) });
-      }
-      setCards((prev) => [...next, ...prev].slice(0, 30));
-    },
-    [],
-  );
-
-  // 外部注入预设方案（从配色推荐「应用」而来）
-  const handleApplyInjected = useCallback(() => {
-    if (!injected || injected.length === 0) return;
-    setCards((prev) => [
-      { id: `${Date.now()}-inj`, type: 'complementary' as HarmonyType, colors: injected },
-      ...prev,
-    ].slice(0, 30));
-  }, [injected]);
+  const generate = useCallback(() => {
+    // 每次生成 8-12 张
+    const count = 8 + Math.floor(Math.random() * 5);
+    const next: WallCard[] = [];
+    for (let i = 0; i < count; i++) {
+      const type = TYPES[Math.floor(Math.random() * TYPES.length)];
+      const base = randomHex();
+      next.push({ id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 6)}`, type, colors: generateHarmony(base, type) });
+    }
+    setCards((prev) => [...next, ...prev].slice(0, 30));
+  }, []);
 
   return (
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center gap-2">
         <button
           type="button"
-          onClick={() => generate(6)}
+          onClick={() => generate()}
           className="inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           🎲 生成灵感墙
         </button>
-        {injected && injected.length > 0 && (
-          <button
-            type="button"
-            onClick={handleApplyInjected}
-            className="inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            + 应用推荐方案
-          </button>
-        )}
       </div>
 
       {cards.length === 0 ? (
         <p className="rounded-lg bg-muted/40 px-3 py-6 text-center text-xs text-muted-foreground">
-          点击「生成灵感墙」自动创建一组随机配色卡片。
+          点击「生成灵感墙」自动创建一组随机配色卡片，瀑布流排布更省空间。
         </p>
       ) : (
-        /* 瀑布流：CSS columns 实现 */
-        <div className="columns-1 gap-4 sm:columns-2 lg:columns-3 [&>*]:mb-4 [&>*]:break-inside-avoid">
+        /* 瀑布流：CSS columns 实现，固定 2 列（小屏 1 列） */
+        <div className="columns-1 gap-4 sm:columns-2 [&>*]:mb-4 [&>*]:break-inside-avoid">
           {cards.map((card) => (
             <div
               key={card.id}
