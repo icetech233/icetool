@@ -2,6 +2,7 @@ import { lazy, Suspense, useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { useJwt } from '../hooks/useJwt';
 import { JwtInput } from '../components/jwt/JwtInput';
+import Seo from '../components/Seo';
 
 const JwtOutput = lazy(() =>
   import('../components/jwt/JwtOutput').then((m) => ({ default: m.JwtOutput })),
@@ -30,6 +31,11 @@ export default function JwtDecodePage() {
 
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible">
+      <Seo
+        title="JWT 解码工具 - 在线解析 Token / 验签 - 寒冰工具箱"
+        description="在线 JWT 解码工具，粘贴 Token 即可实时解析 Header、Payload 与签名，支持过期时间校验，所有数据本地处理不出浏览器。"
+        path="/jwt"
+      />
       <motion.div className="mb-8" variants={itemVariants}>
         <h1 className="text-3xl font-bold text-primary mb-2">JWT 解码工具</h1>
         <p className="text-muted-foreground">输入 JWT Token，实时查看解码结果</p>

@@ -27,6 +27,7 @@ import SchemeRecommend from '../components/color/SchemeRecommend';
 import ColorTrends from '../components/color/ColorTrends';
 import InspirationWall from '../components/color/InspirationWall';
 import type { HarmonyType } from '../utils/color/types';
+import Seo from '../components/Seo';
 
 type ToolTab = 'standard' | 'favorites' | 'history';
 
@@ -109,6 +110,11 @@ export default function ColorLabPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <Seo
+        title="颜色实验室 - HEX/RGB/HSL 在线转换 - 寒冰工具箱"
+        description="在线颜色转换工具，支持 HEX/HEXA、RGB/RGBA、HSL/HSLA 实时双向转换，提供对比度检测、配色推荐、收藏与历史，全部本地计算。"
+        path="/color"
+      />
       {/* 标题区 */}
       <header className="flex flex-col gap-1">
         <h1 className="text-2xl font-bold text-foreground">颜色实验室</h1>

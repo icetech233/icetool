@@ -1,6 +1,7 @@
 import { useCallback } from 'react';
 import CodecView, { type CodecVariant } from '../components/base/CodecView';
 import { decodeUrl, encodeUrl, type UrlCodecMode } from '../utils/urlCodec';
+import Seo from '../components/Seo';
 
 const VARIANTS: readonly CodecVariant<UrlCodecMode>[] = [
   {
@@ -26,7 +27,13 @@ export default function UrlCodecPage() {
   );
 
   return (
-    <CodecView<UrlCodecMode>
+    <>
+      <Seo
+        title="URL 编解码 - 在线百分号编码/解码 - 寒冰工具箱"
+        description="在线 URL 编解码工具，对查询参数或整段 URI 做百分号编码与解码，支持 Component 与 URI 两种粒度，数据本地处理。"
+        path="/url"
+      />
+      <CodecView<UrlCodecMode>
       title="URL 编解码"
       description="对 URL 参数或整段 URI 做百分号编码 / 解码，支持 Component 与 URI 两种粒度。"
       encode={encode}
@@ -36,5 +43,6 @@ export default function UrlCodecPage() {
       encodePlaceholder="例如：张三&age=18"
       decodePlaceholder="例如：%E5%BC%A0%E4%B8%89%26age%3D18"
     />
+    </>
   );
 }
