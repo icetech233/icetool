@@ -2,10 +2,13 @@
  * ColorLabPage —— 「颜色实验室」主页面。
  *
  * 布局（左右固定比例 + 左栏瀑布流）：
- * - 整体为左右两栏，固定比例（桌面 lg: 左 7 / 右 5）。移动端上下堆叠。
- * - 左栏：核心内容（实时预览 / 转换器 / 快速示例 / 配色推荐 / 色彩趋势），
- *   以瀑布流（CSS columns）填充，高度自适应、无内部滚动条、无抖屏。
- * - 右栏：固定区域，自上而下放置「工具箱（3 Tab）」。
+ * - 整体左右两栏：左栏自适应（flex-1），右栏固定宽度（lg:360 / xl:420 / 2xl:480px）。
+ *   移动端上下堆叠，桌面端左右并排（lg 起）。
+ * - 左栏：
+ *   - 头部稳定行（grid）：第一排恒定「实时预览 + 转换器」，不参与瀑布流，避免乱序。
+ *   - 下方瀑布流（CSS columns）：快速示例 / 配色方案推荐 / 色彩趋势 / 随机灵感墙；
+ *     中等屏（md/lg）1 列、大屏（xl+）2 列，高度自适应、无内部滚动条、无抖屏。
+ * - 右栏：固定区域，仅放「工具箱（标准色表 / 收藏 / 历史 3 Tab）」。
  *   工具箱位置恒定（不随左栏瀑布流流动），右栏拥有自身独立高度，
  *   不会被左栏拖出大面积留白，切 Tab 也不位移。
  *
@@ -119,14 +122,12 @@ export default function ColorLabPage() {
         <div className="min-w-0 flex-1">
           {/* 头部稳定行：第一排恒定 实时预览 + 转换器（不参与瀑布流，避免乱序） */}
           <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
-            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">实时预览</h2>
+            <Card title="实时预览">
               <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
-            </div>
-            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-              <h2 className="mb-3 text-sm font-semibold text-foreground">转换器</h2>
+            </Card>
+            <Card title="转换器">
               <ColorConverter converter={converter} />
-            </div>
+            </Card>
           </div>
 
           {/* 下方瀑布流：快速示例 / 配色方案推荐 / 色彩趋势 / 随机灵感墙
@@ -163,8 +164,8 @@ export default function ColorLabPage() {
           </div>
         </div>
 
-        {/* 右栏（固定宽度）：工具箱 + 随机灵感墙，位置恒定、不随左栏流动 */}
-        <aside className="flex w-full flex-col gap-6 lg:w-[380px] lg:flex-none xl:w-[420px]">
+        {/* 右栏（固定宽度，随超宽屏微涨）：仅工具箱，位置恒定、不随左栏流动 */}
+        <aside className="flex w-full flex-col gap-6 lg:w-[360px] lg:flex-none xl:w-[420px] 2xl:w-[480px]">
           {/* 工具箱（3 个 Tab，固定右上区域，切 Tab 不位移） */}
           <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
             <h2 className="mb-3 text-sm font-semibold text-foreground">工具箱</h2>

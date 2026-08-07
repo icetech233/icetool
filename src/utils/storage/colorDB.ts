@@ -87,8 +87,31 @@ export async function isFavoriteColor(hexa: string): Promise<boolean> {
 
 /* ----------------------------- 历史记录 ----------------------------- */
 
+/** 历史记录最大保留条数，超出后裁剪最旧的，避免 IndexedDB 无限膨胀 */
+const HISTORY_MAX = 200;
+
 export function addHistory(item: HistoryItem): Promise<IDBValidKey> {
-  return tx(STORE_HISTORY, 'readwrite', (s) => s.add(item));
+  return tx(STORE_HISTORY, 'readwrite', (s) => s.add(item)).then((key) => {
+    // 异步裁剪：超过上限后删除最旧记录（按 time 升序的前 N 条）
+    void trimHistory(HISTORY_MAX);
+    return key;
+  });
+}
+
+/** 裁剪历史到 max 条以内，保留最新的 */
+async function trimHistory(max: number): Promise<void> {
+  const all = await tx<HistoryItem[]>(STORE_HISTORY, 'readonly', (s) =>
+    s.getAll() as IDBRequest<HistoryItem[]>,
+  );
+  const list = all ?? [];
+  if (list.length <= max) return;
+  const sorted = list.sort((a, b) => a.time - b.time); // 升序：最旧在前
+  const stale = sorted.slice(0, list.length - max);
+  await tx(STORE_HISTORY, 'readwrite', (s) => s.delete(stale[0].id));
+  // 若多于 1 条需删，分事务逐条删除
+  for (let i = 1; i < stale.length; i++) {
+    await tx(STORE_HISTORY, 'readwrite', (s) => s.delete(stale[i].id));
+  }
 }
 
 export function clearHistory(): Promise<undefined> {

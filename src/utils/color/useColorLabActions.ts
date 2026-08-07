@@ -39,10 +39,19 @@ export function useColorLabActions() {
     [showToast],
   );
 
-  /** 记录历史（去重：同一色值 10s 内不重复写入） */
+  /** 历史写入节流：同一色值 800ms 内不重复写入，避免滑块拖动刷屏 */
+  const lastWrite = useRef<{ hex: string; ts: number }>({ hex: '', ts: 0 });
+
+  /** 记录历史（时间窗去重：同色 800ms 内忽略） */
   const pushHistory = useCallback(
     async (hexa: string, source: HistoryItem['source']) => {
-      const item: HistoryItem = { id: uid(), hexa, source, time: Date.now() };
+      const now = Date.now();
+      const norm = hexa.toLowerCase();
+      if (lastWrite.current.hex === norm && now - lastWrite.current.ts < 800) {
+        return;
+      }
+      lastWrite.current = { hex: norm, ts: now };
+      const item: HistoryItem = { id: uid(), hexa, source, time: now };
       try {
         await addHistory(item);
       } catch {

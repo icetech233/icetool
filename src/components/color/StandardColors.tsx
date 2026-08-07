@@ -68,7 +68,7 @@ export default function StandardColors({ onPick }: StandardColorsProps) {
           {filteredNamed.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">未找到匹配的颜色</p>
           ) : (
-            <ul className="grid max-h-96 grid-cols-1 gap-1 overflow-y-auto pr-1 sm:grid-cols-2">
+            <ul className="grid grid-cols-1 gap-1 pr-1 sm:grid-cols-2">
               {filteredNamed.map((c) => (
                 <li key={c.name}>
                   <button
@@ -94,7 +94,7 @@ export default function StandardColors({ onPick }: StandardColorsProps) {
       ) : (
         <div className="flex flex-col gap-2">
           <p className="text-xs text-muted-foreground">点击任意色块填充到转换器（共 216 色）</p>
-          <div className="grid max-h-96 grid-cols-12 gap-1 overflow-y-auto rounded-lg border border-border bg-card p-2">
+          <div className="grid grid-cols-12 gap-1 rounded-lg border border-border bg-card p-2">
             {WEB_SAFE_COLORS.map((c) => (
               <button
                 key={c.hex}
