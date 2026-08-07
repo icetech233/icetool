@@ -7,6 +7,7 @@
 import { useCallback, useRef } from 'react';
 import type { ColorFormat } from '../../utils/color/types';
 import type { UseColorConverter } from '../../utils/color/useColorConverter';
+import CopyButton from '../base/CopyButton';
 
 type ColorConverterProps = {
   converter: UseColorConverter;
@@ -42,25 +43,30 @@ function FormatField({
       >
         {field.label}
       </label>
-      <input
-        id={`color-input-${field.key}`}
-        type="text"
-        inputMode="text"
-        spellCheck={false}
-        value={value}
-        placeholder={field.placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        aria-invalid={isError}
-        aria-describedby={isError ? `color-error-${field.key}` : undefined}
-        className={[
-          'w-full rounded-lg border bg-input px-3 py-2 font-mono text-sm text-foreground',
-          'transition-[border-color,box-shadow,background-color] duration-200',
-          'focus:outline-none focus:ring-2',
-          isError
-            ? 'border-destructive focus:ring-destructive/40'
-            : 'border-border focus:border-primary focus:ring-primary/30',
-        ].join(' ')}
-      />
+      <div className="relative">
+        <input
+          id={`color-input-${field.key}`}
+          type="text"
+          inputMode="text"
+          spellCheck={false}
+          value={value}
+          placeholder={field.placeholder}
+          onChange={(e) => onChange(e.target.value)}
+          aria-invalid={isError}
+          aria-describedby={isError ? `color-error-${field.key}` : undefined}
+          className={[
+            'w-full rounded-lg border bg-input pl-3 pr-9 py-2 font-mono text-sm text-foreground',
+            'transition-[border-color,box-shadow,background-color] duration-200',
+            'focus:outline-none focus:ring-2',
+            isError
+              ? 'border-destructive focus:ring-destructive/40'
+              : 'border-border focus:border-primary focus:ring-primary/30',
+          ].join(' ')}
+        />
+        <div className="absolute inset-y-0 right-1 flex items-center">
+          <CopyButton value={value} iconOnly />
+        </div>
+      </div>
     </div>
   );
 }

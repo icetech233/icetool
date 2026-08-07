@@ -1,6 +1,12 @@
 import { useState, useEffect, useRef } from 'react';
 
-function CopyButton({ value }: { value: string | null }) {
+function CopyButton({
+  value,
+  iconOnly = false,
+}: {
+  value: string | null;
+  iconOnly?: boolean;
+}) {
   const [copied, setCopied] = useState(false);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -27,20 +33,19 @@ function CopyButton({ value }: { value: string | null }) {
       type="button"
       onClick={handleCopy}
       disabled={!value}
-      className="ml-auto inline-flex items-center gap-1 text-xs text-primary disabled:opacity-40 rounded px-2 py-1 transition-colors"
-      title="Copy"
+      className={[
+        'inline-flex items-center justify-center text-primary disabled:opacity-40 rounded transition-colors',
+        iconOnly ? 'h-5 w-5 hover:bg-muted' : 'ml-auto gap-1 px-2 py-1 text-xs hover:bg-muted',
+      ].join(' ')}
+      title={copied ? '已复制' : '复制'}
+      aria-label={copied ? '已复制' : '复制'}
     >
       {copied ? (
-        <>
-          <span>✓</span>
-          <span>Copied</span>
-        </>
+        <span aria-hidden="true">✓</span>
       ) : (
-        <>
-          <span>⧉</span>
-          <span>Copy</span>
-        </>
+        <span aria-hidden="true">⧉</span>
       )}
+      {!iconOnly && <span>{copied ? '已复制' : '复制'}</span>}
     </button>
   );
 }
