@@ -3,7 +3,7 @@
   "configVersion": 1,
   "workspaces": {
     "": {
-      "name": "jwt-parse",
+      "name": "ice-tool",
       "dependencies": {
         "motion": "^12.43.0",
         "react": "^19.2.8",
@@ -19,7 +19,7 @@
         "@vitejs/plugin-react": "^6.0.5",
         "tailwindcss": "^4.3.3",
         "typescript": "^7.0.2",
-        "vite": "^8.2.0",
+        "vite": "^8.2.1",
       },
     },
   },
