@@ -1,19 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { useFullscreen } from '../hooks/useFullscreen';
 
 /**
- * 页面右上角 Header 工具区
- * 从左到右：全屏、通知、用户信息、主题切换、设置
+ * 应用顶部工具区
+ * 从左到右：全屏、通知、用户信息、主题切换、设置。
+ * 桌面端渲染在页面顶部右侧；移动端渲染在顶部条的汉堡按钮左侧。
  */
-function HeaderRight() {
-  const [isFullscreen, setIsFullscreen] = useState(false);
+function AppToolbar() {
+  const THEME_KEY = 'ice:theme';
+  const { isFullscreen, toggle: toggleFullscreen } = useFullscreen();
   const [isDark, setIsDark] = useState(false);
-
-  // 同步真实全屏状态（用户按 ESC 退出时）
-  useEffect(() => {
-    const onChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
-    document.addEventListener('fullscreenchange', onChange);
-    return () => document.removeEventListener('fullscreenchange', onChange);
-  }, []);
 
   // 初始化主题：class 已由 index.html 的内联脚本在首绘前写入，
   // 这里只需把 React state 同步到既有的 DOM 状态，避免二次闪烁。
@@ -22,11 +18,11 @@ function HeaderRight() {
   }, []);
 
   // 跟随系统主题实时切换：仅在用户未手动指定过主题
-  // （localStorage 无 'theme' 记录）时生效，手动选择优先级更高。
+  // （localStorage 无 THEME_KEY 记录）时生效，手动选择优先级更高。
   useEffect(() => {
     const media = window.matchMedia('(prefers-color-scheme: dark)');
     const onSystemChange = (e: MediaQueryListEvent) => {
-      if (localStorage.getItem('theme') !== null) return;
+      if (localStorage.getItem(THEME_KEY) !== null) return;
       setIsDark(e.matches);
       document.documentElement.classList.toggle('dark', e.matches);
     };
@@ -34,19 +30,11 @@ function HeaderRight() {
     return () => media.removeEventListener('change', onSystemChange);
   }, []);
 
-  const toggleFullscreen = () => {
-    if (document.fullscreenElement) {
-      document.exitFullscreen().catch(() => {});
-    } else {
-      document.documentElement.requestFullscreen().catch(() => {});
-    }
-  };
-
   const toggleTheme = () => {
     const next = !isDark;
     setIsDark(next);
     document.documentElement.classList.toggle('dark', next);
-    localStorage.setItem('theme', next ? 'dark' : 'light');
+    localStorage.setItem(THEME_KEY, next ? 'dark' : 'light');
   };
 
   // 统一的圆形图标按钮样式
@@ -102,7 +90,7 @@ function HeaderRight() {
         <span className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-primary text-sm font-medium text-primary-foreground">
           明
         </span>
-        <span className="text-sm font-medium text-foreground">小明</span>
+        <span className="hidden sm:inline text-sm font-medium text-foreground">小明</span>
       </button>
 
       {/* 主题切换按钮 */}
@@ -136,4 +124,4 @@ function HeaderRight() {
   );
 }
 
-export default HeaderRight;
+export default AppToolbar;
