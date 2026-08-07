@@ -38,6 +38,16 @@
   --color-input: hsl(var(--input) / 100%);
   --color-ring: hsl(var(--ring) / 100%);
 
+  /* 交换 / 清空按钮专属色彩（自动随 .dark 切换） */
+  --color-swap: hsl(var(--swap-color) / 100%);
+  --color-swap-hover: hsl(var(--swap-hover) / 100%);
+  --color-swap-active: hsl(var(--swap-active) / 100%);
+  --color-swap-fg: hsl(var(--swap-fg) / 100%);
+  --color-clear: hsl(var(--clear-color) / 100%);
+  --color-clear-hover: hsl(var(--clear-hover) / 100%);
+  --color-clear-active: hsl(var(--clear-active) / 100%);
+  --color-clear-fg: hsl(var(--clear-fg) / 100%);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
