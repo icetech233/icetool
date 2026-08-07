@@ -1,9 +1,19 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
+import { compression } from 'vite-plugin-compression2';
 import { fileURLToPath, URL } from 'node:url';
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    // 生成 .br（brotli）压缩文件
+    compression({
+      algorithms: ['brotliCompress'],
+      include: [/\.(js|mjs|json|css|html|svg|ico|txt)$/],
+      threshold: 0,
+      deleteOriginalAssets: false,
+    }),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
