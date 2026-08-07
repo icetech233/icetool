@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
 import Logo from './Logo';
 import MenuList from './MenuList';
 import { ChevronLeftIcon, ChevronRightIcon } from './icons';
 import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
+import { useCollapseButtonVisibility } from '../utils/useCollapseButtonVisibility';
 
 /**
  * 桌面端侧边栏：logo + 菜单，可折叠/展开，状态由 useSidebarCollapsed 持久化到 localStorage。
@@ -11,63 +11,8 @@ import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
  */
 export default function DesktopSidebar() {
   const { collapsed, toggle } = useSidebarCollapsed();
-  const [buttonVisible, setButtonVisible] = useState(true);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  /**
-   * 清除隐藏定时器
-   */
-  const clearHideTimer = useCallback(() => {
-    if (hideTimerRef.current) {
-      clearTimeout(hideTimerRef.current);
-      hideTimerRef.current = null;
-    }
-  }, []);
-
-  /**
-   * 启动1秒后隐藏按钮的定时器（仅在折叠状态下）
-   */
-  const scheduleHide = useCallback(() => {
-    clearHideTimer();
-    hideTimerRef.current = setTimeout(() => {
-      setButtonVisible(false);
-    }, 1000);
-  }, [clearHideTimer]);
-
-  /**
-   * 折叠状态变化时：
-   * - 展开：按钮始终可见，清除定时器
-   * - 折叠：立即显示按钮，1秒后自动隐藏
-   */
-  useEffect(() => {
-    if (collapsed) {
-      setButtonVisible(true);
-      scheduleHide();
-    } else {
-      clearHideTimer();
-      setButtonVisible(true);
-    }
-    return clearHideTimer;
-  }, [collapsed, scheduleHide, clearHideTimer]);
-
-  /**
-   * 鼠标进入侧边栏区域：折叠状态下显示按钮
-   */
-  const handleMouseEnter = useCallback(() => {
-    if (collapsed) {
-      clearHideTimer();
-      setButtonVisible(true);
-    }
-  }, [collapsed, clearHideTimer]);
-
-  /**
-   * 鼠标离开侧边栏区域：折叠状态下重新启动1秒隐藏定时器
-   */
-  const handleMouseLeave = useCallback(() => {
-    if (collapsed) {
-      scheduleHide();
-    }
-  }, [collapsed, scheduleHide]);
+  const { buttonVisible, handleMouseEnter, handleMouseLeave } =
+    useCollapseButtonVisibility(collapsed);
 
   return (
     <aside
