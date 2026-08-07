@@ -118,7 +118,7 @@ export default function ColorLabPage() {
         {/* 左栏：核心内容（头部稳定两列行 + 下方瀑布流） */}
         <div className="min-w-0 flex-1">
           {/* 头部稳定行：第一排恒定 实时预览 + 转换器（不参与瀑布流，避免乱序） */}
-          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+          <div className="mb-6 grid grid-cols-1 gap-6 xl:grid-cols-2">
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               <h2 className="mb-3 text-sm font-semibold text-foreground">实时预览</h2>
               <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
@@ -129,8 +129,9 @@ export default function ColorLabPage() {
             </div>
           </div>
 
-          {/* 下方瀑布流：快速示例 / 配色方案推荐 / 色彩趋势 / 随机灵感墙 */}
-          <div className="columns-1 gap-6 md:columns-2">
+          {/* 下方瀑布流：快速示例 / 配色方案推荐 / 色彩趋势 / 随机灵感墙
+              中等屏（md/lg）保持 1 列避免拥挤，大屏（xl+）才 2 列 */}
+          <div className="columns-1 gap-6 xl:columns-2">
             {/* 快速示例 */}
             <Card title="快速示例">
               <QuickExamples onPick={handlePick} />
