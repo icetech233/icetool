@@ -10,7 +10,7 @@ import {
   createHighlighterCore,
   createJavaScriptRegexEngine,
 } from 'react-shiki/core';
-import CopyButton from './CopyButton';
+import CopyButton from '../base/CopyButton';
 
 interface JwtOutputProps {
   decoded: {

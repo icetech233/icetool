@@ -5,8 +5,8 @@
  * 非法输入保留上次有效值并给出温和错误态提示。
  */
 import { useCallback, useRef } from 'react';
-import type { ColorFormat } from '../types';
-import type { UseColorConverter } from '../useColorConverter';
+import type { ColorFormat } from '../../utils/color/types';
+import type { UseColorConverter } from '../../utils/color/useColorConverter';
 
 type ColorConverterProps = {
   converter: UseColorConverter;

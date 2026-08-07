@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import CodecView, { type CodecVariant } from '../components/CodecView';
+import CodecView, { type CodecVariant } from '../components/base/CodecView';
 import { decodeUrl, encodeUrl, type UrlCodecMode } from '../utils/urlCodec';
 
 const VARIANTS: readonly CodecVariant<UrlCodecMode>[] = [

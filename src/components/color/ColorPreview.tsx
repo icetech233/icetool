@@ -5,7 +5,7 @@
  * 色值变化带 0.2s 平滑过渡；支持深色/浅色下准确显色。
  */
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { getContrastRating } from '../convert';
+import { getContrastRating } from '../../utils/color/convert';
 
 type ColorPreviewProps = {
   hexa: string;

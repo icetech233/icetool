@@ -4,7 +4,7 @@
  * - Web 安全色：216 色网格，悬停显示色值，点击填充主转换器。
  */
 import { useMemo, useState } from 'react';
-import { NAMED_COLORS, WEB_SAFE_COLORS } from '../data';
+import { NAMED_COLORS, WEB_SAFE_COLORS } from '../../utils/color/data';
 
 type StandardColorsProps = {
   onPick: (hex: string) => void;

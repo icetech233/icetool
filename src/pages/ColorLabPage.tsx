@@ -6,11 +6,11 @@
  * 工具栏内部在「快速示例」与「标准色表」之间切换。
  */
 import { useState } from 'react';
-import { useColorConverter } from '../color/useColorConverter';
-import ColorPreview from '../color/components/ColorPreview';
-import ColorConverter from '../color/components/ColorConverter';
-import QuickExamples from '../color/components/QuickExamples';
-import StandardColors from '../color/components/StandardColors';
+import { useColorConverter } from '../utils/color/useColorConverter';
+import ColorPreview from '../components/color/ColorPreview';
+import ColorConverter from '../components/color/ColorConverter';
+import QuickExamples from '../components/color/QuickExamples';
+import StandardColors from '../components/color/StandardColors';
 
 type ToolTab = 'quick' | 'standard';
 

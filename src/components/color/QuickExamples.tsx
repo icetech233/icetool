@@ -5,9 +5,9 @@
  * - 点击任意颜色填充到主转换器。
  */
 import { useCallback, useState } from 'react';
-import { PALETTES } from '../data';
-import { generateHarmony, randomHex } from '../convert';
-import type { HarmonyType } from '../types';
+import { PALETTES } from '../../utils/color/data';
+import { generateHarmony, randomHex } from '../../utils/color/convert';
+import type { HarmonyType } from '../../utils/color/types';
 
 type QuickExamplesProps = {
   onPick: (hex: string) => void;

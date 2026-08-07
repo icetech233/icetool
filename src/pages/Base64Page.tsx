@@ -1,5 +1,5 @@
 import { useCallback } from 'react';
-import CodecView, { type CodecVariant } from '../components/CodecView';
+import CodecView, { type CodecVariant } from '../components/base/CodecView';
 import { decodeBase64, encodeBase64 } from '../utils/base64';
 
 type Base64Variant = 'standard' | 'url';

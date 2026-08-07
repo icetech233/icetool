@@ -1,10 +1,10 @@
 import { lazy, Suspense, useState } from 'react';
 import { motion, type Variants } from 'motion/react';
 import { useJwt } from '../hooks/useJwt';
-import { JwtInput } from '../components/JwtInput';
+import { JwtInput } from '../components/jwt/JwtInput';
 
 const JwtOutput = lazy(() =>
-  import('../components/JwtOutput').then((m) => ({ default: m.JwtOutput })),
+  import('../components/jwt/JwtOutput').then((m) => ({ default: m.JwtOutput })),
 );
 
 const containerVariants: Variants = {
