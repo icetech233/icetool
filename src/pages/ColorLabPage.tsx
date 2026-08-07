@@ -115,46 +115,51 @@ export default function ColorLabPage() {
 
       {/* 左右固定比例布局：左栏瀑布流核心内容，右栏固定放工具箱 + 灵感墙 */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
-        {/* 左栏：核心内容瀑布流（自适应列数，高度随内容，无内部滚动条） */}
-        <div className="min-w-0 columns-1 gap-6 lg:flex-1 md:columns-2">
-          {/* 实时预览 */}
-          <Card title="实时预览">
-            <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
-          </Card>
+        {/* 左栏：核心内容（头部稳定两列行 + 下方瀑布流） */}
+        <div className="min-w-0 flex-1">
+          {/* 头部稳定行：第一排恒定 实时预览 + 转换器（不参与瀑布流，避免乱序） */}
+          <div className="mb-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">实时预览</h2>
+              <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
+            </div>
+            <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+              <h2 className="mb-3 text-sm font-semibold text-foreground">转换器</h2>
+              <ColorConverter converter={converter} />
+            </div>
+          </div>
 
-          {/* 转换器 */}
-          <Card title="转换器">
-            <ColorConverter converter={converter} />
-          </Card>
+          {/* 下方瀑布流：快速示例 / 配色方案推荐 / 色彩趋势 / 随机灵感墙 */}
+          <div className="columns-1 gap-6 md:columns-2">
+            {/* 快速示例 */}
+            <Card title="快速示例">
+              <QuickExamples onPick={handlePick} />
+            </Card>
 
-          {/* 快速示例 */}
-          <Card title="快速示例">
-            <QuickExamples onPick={handlePick} />
-          </Card>
+            {/* 配色方案推荐 */}
+            <Card title="配色方案推荐">
+              <SchemeRecommend
+                currentHex={converter.values.hexa}
+                onPick={handlePick}
+                onApplyScheme={handleApplyScheme}
+                onFavoriteScheme={handleFavoriteScheme}
+              />
+            </Card>
 
-          {/* 配色方案推荐 */}
-          <Card title="配色方案推荐">
-            <SchemeRecommend
-              currentHex={converter.values.hexa}
-              onPick={handlePick}
-              onApplyScheme={handleApplyScheme}
-              onFavoriteScheme={handleFavoriteScheme}
-            />
-          </Card>
+            {/* 色彩趋势 */}
+            <Card title="色彩趋势">
+              <ColorTrends refreshKey={refreshKey} />
+            </Card>
 
-          {/* 色彩趋势 */}
-          <Card title="色彩趋势">
-            <ColorTrends refreshKey={refreshKey} />
-          </Card>
-
-          {/* 随机灵感墙（左栏瀑布流末尾，内部同样用瀑布流） */}
-          <Card title="随机灵感墙">
-            <InspirationWall
-              onApplyScheme={handleApplyScheme}
-              onFavoriteScheme={handleFavoriteScheme}
-              injected={injectedScheme}
-            />
-          </Card>
+            {/* 随机灵感墙（左栏瀑布流末尾，内部同样用瀑布流） */}
+            <Card title="随机灵感墙">
+              <InspirationWall
+                onApplyScheme={handleApplyScheme}
+                onFavoriteScheme={handleFavoriteScheme}
+                injected={injectedScheme}
+              />
+            </Card>
+          </div>
         </div>
 
         {/* 右栏（固定宽度）：工具箱 + 随机灵感墙，位置恒定、不随左栏流动 */}
