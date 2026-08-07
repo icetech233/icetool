@@ -48,6 +48,13 @@
   --color-clear-active: hsl(var(--clear-active) / 100%);
   --color-clear-fg: hsl(var(--clear-fg) / 100%);
 
+  /* 侧边栏折叠按钮专属色彩 */
+  --color-collapse: hsl(var(--collapse) / 100%);
+  --color-collapse-hover: hsl(var(--collapse-hover) / 100%);
+  --color-collapse-fg: hsl(var(--collapse-fg) / 100%);
+  --color-collapse-border: hsl(var(--collapse-border) / 100%);
+  --color-collapse-shadow: hsl(var(--collapse-shadow) / 100%);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);

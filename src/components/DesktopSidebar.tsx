@@ -46,17 +46,21 @@ export default function DesktopSidebar() {
         className={[
           'absolute z-20 inline-flex items-center justify-center',
           'h-8 w-8 rounded-full',
-          'bg-card border border-border shadow-sm',
-          'text-muted-foreground',
-          'hover:bg-muted hover:text-foreground hover:shadow-md',
-          'active:scale-95',
-          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+          /* 配色：青蓝主色，柔和且醒目，明/暗主题由 CSS 变量自动切换 */
+          'bg-collapse border border-collapse-border text-collapse-fg',
+          'shadow-[0_1px_3px_hsl(var(--collapse-shadow)/0.35)]',
+          /* 悬浮：背景渐变加深、整体放大 1.2 倍、外发光，0.3 秒平滑过渡 */
+          'hover:bg-collapse-hover hover:scale-[1.2]',
+          'hover:shadow-[0_4px_12px_hsl(var(--collapse-shadow)/0.5)]',
+          /* 按下回弹，避免突兀 */
+          'active:scale-110',
+          'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-collapse',
           /* 右边缘对齐：right: -16px，将按钮宽度的一半移出侧边栏 */
           'right-[-16px]',
           /* 垂直位置：放在顶部 Logo 区域的下方，与分隔线大致对齐 */
           'top-[68px]',
-          /* 显示/隐藏过渡动画：0.4秒 */
-          'transition-[opacity,transform,box-shadow] duration-[400ms] ease-in-out',
+          /* 显示/隐藏 + 配色过渡：0.3 秒平滑，避免突兀 */
+          'transition-[opacity,transform,background-color,border-color,box-shadow] duration-300 ease-in-out',
           /* 可见性控制：展开时始终可见，折叠时根据 buttonVisible 状态淡入淡出 */
           !collapsed || buttonVisible
             ? 'opacity-100 translate-x-0 pointer-events-auto'

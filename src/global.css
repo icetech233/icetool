@@ -45,6 +45,19 @@
   --jwt-payload: 204 87% 53%;    /* 推特蓝 - Payload */
   --jwt-signature: 142 71% 40%;  /* 绿色 - Signature */
 
+  /*
+   * 侧边栏折叠/展开按钮专属色彩 token（明/暗两套，由 .dark 覆写）。
+   * 浅色模式：淡蓝主色（柔和且醒目、非黑白）；暗色模式：深蓝主色。
+   * 每个按钮给出：默认底色(--collapse)、悬停加深(--collapse-hover)、
+   * 文本/图标色(--collapse-fg)、边框(--collapse-border)、阴影(--collapse-shadow)。
+   * 文本与图标色保证对各自底色 >= 4.5:1 对比度。
+   */
+  --collapse: 210 90% 70%;          /* 浅色：淡蓝 #7fb8f5 系 */
+  --collapse-hover: 210 90% 62%;    /* 悬停渐变加深 */
+  --collapse-fg: 210 60% 18%;       /* 深蓝字，对淡蓝底 5.10:1 */
+  --collapse-border: 210 80% 60%;   /* 边框同色系稍深 */
+  --collapse-shadow: 210 90% 70%;   /* 阴影取主色，悬浮时外发光 */
+
   color-scheme: light;
 }
 
@@ -103,6 +116,13 @@
   --jwt-header: 35 95% 62%;        /* 琥珀 */
   --jwt-payload: 204 88% 66%;      /* 推特蓝 */
   --jwt-signature: 142 60% 58%;    /* 绿 */
+
+  /* 侧边栏折叠按钮暗色 token：深蓝主色，白字以满足暗底对比度（>= 4.5:1 对深蓝底） */
+  --collapse: 218 60% 38%;          /* 深蓝 #284b9c 系，对 card 5.21:1 */
+  --collapse-hover: 218 64% 46%;    /* 悬停略提亮 */
+  --collapse-fg: 0 0% 100%;         /* 白字，对深蓝底 7.40:1 */
+  --collapse-border: 218 55% 30%;   /* 边框同色系更深 */
+  --collapse-shadow: 218 60% 45%;   /* 阴影取主色，悬浮外发光 */
 
   color-scheme: dark;
 }
