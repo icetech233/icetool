@@ -5,7 +5,7 @@
  * - 整体为左右两栏，固定比例（桌面 lg: 左 7 / 右 5）。移动端上下堆叠。
  * - 左栏：核心内容（实时预览 / 转换器 / 快速示例 / 配色推荐 / 色彩趋势），
  *   以瀑布流（CSS columns）填充，高度自适应、无内部滚动条、无抖屏。
- * - 右栏：固定区域，自上而下放置「工具箱（3 Tab）」与「随机灵感墙」。
+ * - 右栏：固定区域，自上而下放置「工具箱（3 Tab）」。
  *   工具箱位置恒定（不随左栏瀑布流流动），右栏拥有自身独立高度，
  *   不会被左栏拖出大面积留白，切 Tab 也不位移。
  *
@@ -116,7 +116,7 @@ export default function ColorLabPage() {
       {/* 左右固定比例布局：左栏瀑布流核心内容，右栏固定放工具箱 + 灵感墙 */}
       <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
         {/* 左栏：核心内容瀑布流（自适应列数，高度随内容，无内部滚动条） */}
-        <div className="min-w-0 columns-1 gap-6 md:columns-2 lg:flex-1 lg:columns-2 xl:columns-3">
+        <div className="min-w-0 columns-1 gap-6 lg:flex-1 md:columns-2">
           {/* 实时预览 */}
           <Card title="实时预览">
             <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
@@ -145,6 +145,15 @@ export default function ColorLabPage() {
           {/* 色彩趋势 */}
           <Card title="色彩趋势">
             <ColorTrends refreshKey={refreshKey} />
+          </Card>
+
+          {/* 随机灵感墙（左栏瀑布流末尾，内部同样用瀑布流） */}
+          <Card title="随机灵感墙">
+            <InspirationWall
+              onApplyScheme={handleApplyScheme}
+              onFavoriteScheme={handleFavoriteScheme}
+              injected={injectedScheme}
+            />
           </Card>
         </div>
 
@@ -179,16 +188,6 @@ export default function ColorLabPage() {
               />
             )}
             {toolTab === 'history' && <HistoryPanel onPick={handlePick} refreshKey={refreshKey} />}
-          </div>
-
-          {/* 随机灵感墙（右栏固定区域内，内部用瀑布流） */}
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">随机灵感墙</h2>
-            <InspirationWall
-              onApplyScheme={handleApplyScheme}
-              onFavoriteScheme={handleFavoriteScheme}
-              injected={injectedScheme}
-            />
           </div>
         </aside>
       </div>
