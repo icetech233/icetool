@@ -3,10 +3,10 @@
 ## 概要
 
 本项目是一个基于 React 19 + TypeScript 的纯前端编解码工具集，品牌名「寒冰工具箱」（ICE）。
-目前已实现 JWT 解码、Base64 编解码、URL 编解码三个功能，全部数据在浏览器本地处理，不发送到服务端。
+目前已实现 JWT 解码、Base64 编解码、URL 编解码、颜色实验室四个功能，全部数据在浏览器本地处理，不发送到服务端。
 
 项目采用 Vite 8 + Tailwind CSS v4 构建，样式由 CSS 变量驱动明/暗双主题（推特 X 风格配色）。
-路由由 `react-router-dom` 驱动，`App.tsx` 退化为入口壳，布局由 `Layout.tsx` 编排，
+路由由 `react-router-dom` 驱动，通过 `LazyBoundary` 包裹懒加载页面；`App.tsx` 退化为入口壳，布局由 `Layout.tsx` 编排，
 各功能页面懒加载，代码按 react / motion / shiki 分包。
 
 ## 技术栈
@@ -15,9 +15,10 @@
 - **构建工具**：Vite 8（`vite` + `@vitejs/plugin-react`），脚本见 `package.json`（`dev` / `build` / `preview` / `typecheck`）。
 - **样式方案**：Tailwind CSS v4（`@tailwindcss/postcss` + `tailwindcss`），CSS-first 配置，无 `tailwind.config.ts`。
 - **语言**：TypeScript 7（`tsconfig.json`，`strict` + `noUnusedLocals` 等全开）。
-- **路由**：`react-router-dom`（`^7.18`），`createBrowserRouter` + `RouterProvider`，路由表位于 `router.tsx`，`/` 根路由挂载布局壳，子路由懒加载各功能页面。
-- **动画**：`motion`（即 `framer-motion` 的新包名，`^12.43.0`），从 `motion/react` 导入。
+- **路由**：`react-router-dom`（`^7.x`），`createBrowserRouter` + `RouterProvider`，路由表位于 `router.tsx`，`/` 根路由挂载布局壳，子路由懒加载各功能页面。
+- **动画**：`motion`（即 `framer-motion` 的新包名，`^12.x`），从 `motion/react` 导入。
 - **语法高亮**：`react-shiki`（`^0.11.0`）+ 按需加载的 Shiki 引擎（`@shikijs/langs/json`、`@shikijs/themes/github-light`/`github-dark`），用于 JWT 解码后 JSON 的彩色展示。
+- **颜色处理**：`colord`（`^3.x`）+ 插件 `colord/plugins/a11y`（对比度）、`colord/plugins/mix`（混色），用于颜色实验室的格式转换、对比度检测与和谐配色生成。
 
 ## 文件结构与模块职责
 
@@ -37,32 +38,47 @@ jwtparse/
     ├── global.css          # 全局样式：明/暗双主题 CSS 变量、滚动条、选中样式、JWT 高亮工具类
     ├── App.tsx             # 应用根组件：仅装配 global.css + 渲染 Layout
     ├── Layout.tsx          # 主布局：Sidebar + 顶部 AppToolbar + <Outlet />（Suspense 兜底）
-    ├── router.tsx          # 路由表定义（/ → /jwt 重定向，/jwt /base64 /url 子路由）
+    ├── router.tsx          # 路由表定义（/ → /jwt 重定向，/jwt /base64 /url /color 子路由）
     ├── config/
     │   └── menuItems.tsx   # 菜单项配置数组（{ path, label, icon }），驱动 Sidebar 与路由
     ├── components/
+    │   ├── base/           # 通用基础组件
+    │   │   ├── CodecView.tsx   # 通用「编解码」双栏视图（三态动画，供 Base64/URL 复用）
+    │   │   └── CopyButton.tsx  # 通用复制按钮（写剪贴板 + 复制反馈）
+    │   ├── color/          # 颜色实验室专属组件
+    │   │   ├── ColorPreview.tsx    # 实时预览 + WCAG 对比度评级
+    │   │   ├── ColorConverter.tsx  # 转换器面板（多格式输入 + 滑块微调）
+    │   │   ├── QuickExamples.tsx   # 快捷工具栏：随机灵感 + 精选调色板
+    │   │   └── StandardColors.tsx  # 快捷工具栏：CSS 命名色 + Web 安全色
+    │   ├── jwt/            # JWT 解码专属组件
+    │   │   ├── JwtInput.tsx    # JWT 输入组件（文本域 + 实时语法高亮叠层）
+    │   │   └── JwtOutput.tsx   # JWT 解码结果展示组件（懒加载，Shiki 高亮）
     │   ├── Sidebar.tsx         # 响应式侧边栏分发器（lg 以上 DesktopSidebar，以下 MobileTopbar）
     │   ├── DesktopSidebar.tsx  # 桌面端侧边栏（固定 w-56 / 折叠 w-16，状态持久化 localStorage）
     │   ├── MobileTopbar.tsx    # 移动端顶部条（Logo + 工具区 + 汉堡菜单按钮 + 下拉菜单）
     │   ├── MenuList.tsx        # 菜单项列表（NavLink 驱动，motion stagger 入场动画）
     │   ├── Logo.tsx            # 品牌 Logo（ICE 图标 + "寒冰工具箱" 文字）
     │   ├── icons.tsx           # 内联 SVG 图标组件（MenuIcon / CloseIcon / ChevronLeftIcon / ChevronRightIcon）
-    │   ├── AppToolbar.tsx      # 页面右上角工具区（全屏 / 通知 / 用户 / 主题 / 设置）
-    │   ├── JwtInput.tsx        # JWT 输入组件（文本域 + 实时语法高亮叠层）
-    │   ├── JwtOutput.tsx       # JWT 解码结果展示组件（懒加载，Shiki 高亮）
-    │   ├── CodecView.tsx       # 通用「编解码」双栏视图（三态动画，供 Base64/URL 复用）
-    │   └── CopyButton.tsx      # 通用复制按钮（写剪贴板 + 复制反馈）
+    │   └── AppToolbar.tsx      # 页面右上角工具区（全屏 / 通知 / 用户 / 主题 / 设置）
     ├── pages/
     │   ├── JwtDecodePage.tsx   # JWT 解码功能页
     │   ├── Base64Page.tsx      # Base64 编解码功能页
-    │   └── UrlCodecPage.tsx    # URL 编解码功能页
+    │   ├── UrlCodecPage.tsx    # URL 编解码功能页
+    │   ├── ColorLabPage.tsx    # 颜色实验室功能页
+    │   └── ComingSoonPage.tsx  # 「功能开发中」占位页（暂无路由直接指向，预留给未来扩展）
     ├── hooks/
-    │   ├── useJwt.ts             # JWT 解码核心逻辑 Hook
+    │   ├── useJwt.ts               # JWT 解码核心逻辑 Hook
     │   ├── useSidebarCollapsed.ts # 侧边栏折叠状态 Hook（持久化 localStorage）
-    │   └── useFullscreen.ts      # 全屏状态 Hook（同步真实全屏状态）
+    │   └── useFullscreen.ts        # 全屏状态 Hook（同步真实全屏状态）
     └── utils/
-        ├── base64.ts          # UTF-8 安全的 Base64 编解码（含 URL-safe 变体、错误分类）
-        └── urlCodec.ts        # URL 编解码（Component / URI 两种粒度）
+        ├── base64.ts            # UTF-8 安全的 Base64 编解码（含 URL-safe 变体、错误分类）
+        ├── urlCodec.ts          # URL 编解码（Component / URI 两种粒度）
+        ├── useCollapseButtonVisibility.ts # 折叠态下折叠按钮自动隐藏/悬停显示的 Hook
+        └── color/               # 颜色实验室纯逻辑（与 UI 解耦，便于复用与单测）
+            ├── types.ts             # 颜色核心类型（ColorFormat / ColorValues / ParseResult 等）
+            ├── convert.ts           # 纯函数：格式解析、真值派生、对比度、和谐配色、随机色
+            ├── data.ts              # 静态数据：精选调色板、CSS 命名色（148）、Web 安全色（216）
+            └── useColorConverter.ts # 核心状态容器 Hook：以 HEXA 为真值派生所有格式
 ```
 
 ### 样式系统（Tailwind v4 CSS-first）
@@ -117,7 +133,7 @@ jwtparse/
   - 顶部区域：`Logo` + 折叠按钮（`ChevronLeftIcon`），折叠时仅展示折叠按钮。
   - 菜单区域：`MenuList` 组件，`collapsed` 控制文字显隐。
   - 折叠状态通过 `useSidebarCollapsed` Hook 持久化到 `localStorage`（key: `ice:sidebar-collapsed`）。
-  - 折叠按钮在折叠状态下移至菜单区上方，展开状态下在 Logo 右侧。
+  - 折叠态下折叠按钮通过 `useCollapseButtonVisibility` Hook 控制自动隐藏/悬停显示（延迟 1s）。
 
 ### 5. `MobileTopbar.tsx`（移动端顶部条）
 
@@ -188,7 +204,7 @@ jwtparse/
   - 高亮器通过 `createHighlighterCore` + `createJavaScriptRegexEngine` 在 `useEffect` 中按需加载 json 语言与 github 双主题。
 - **数据流**：`JwtDecodePage` → `JwtOutput`（通过 `decoded` Prop）。
 
-### 14. `CodecView.tsx`（通用编解码视图）
+### 14. `CodecView.tsx`（通用编解码视图，位于 `components/base/`）
 
 - **职责**：
   - 供 Base64、URL 等文本级编解码工具复用的双栏视图。调用方注入 `encode(input, variant)` / `decode(input, variant)` 两个纯函数，以及可选的 `variants` 描述子模式。
@@ -196,30 +212,51 @@ jwtparse/
   - 左列：受控 `<textarea>`；右列：结果展示区，按 `error / empty / success` 三态 `AnimatePresence mode="wait"` 切换，错误态含抖动，成功态附 `CopyButton` 与长度提示。
   - 结果由 `useMemo` 同步派生，与 `useJwt` 思路一致。
 
-### 15. `CopyButton.tsx`（复制按钮）
+### 15. `CopyButton.tsx`（复制按钮，位于 `components/base/`）
 
 - **职责**：通用按钮，`navigator.clipboard.writeText` 写入剪贴板，成功后 1.5s 显示「✓ Copied」，失败静默。
 
-### 16. `router.tsx`（路由表）
+### 16. `颜色实验室`（ColorLab）
+
+颜色实验室是一套独立的子模块，遵循「纯逻辑（`utils/color/`）+ UI（`components/color/`）+ 页面（`pages/ColorLabPage.tsx`）」分层：
+
+- **`utils/color/types.ts`**：核心类型定义。`ColorFormat`（hex/hexa/rgb/rgba/hsl/hsla）、`ColorValues`（各格式展示字符串）、`ParseResult`（真值解析结果）、`Palette` / `NamedColor` / `WebSafeColor` / `ContrastRating` 等。
+- **`utils/color/convert.ts`**：纯函数集合（无 React 依赖）：
+  - `parseAnyColor(input)`：将任意合法颜色字符串解析为恒定 8 位 HEXA 真值，容错返回 `{ ok, hex, error }`。
+  - `deriveAllFormats(hex)`：从 HEXA 真值派生所有展示格式。
+  - `getContrastRating(hex)`：WCAG 对比度评级（对白/黑背景的 AA/AAA 达标情况）。
+  - `generateHarmony(baseHex, type)`：生成互补/类似/三角和谐配色。
+  - `randomHex()` / `isValidColor()`：随机色与安全校验。
+- **`utils/color/data.ts`**：静态数据——6 组精选调色板、148 个 CSS 标准命名色、216 个 Web 安全色网格。
+- **`utils/color/useColorConverter.ts`**：核心状态容器 Hook。以 HEXA 真值为唯一来源，派生所有格式；任一格式输入变更即解析为 HEXA 并同步其余；滑块基于当前真值微调 H/S/L/Alpha；非法输入容错（保留上次有效值 + error 提示）。返回 `{ hex, values, error, lastEdited, setFormat, setHex, setAlpha, setHue, setSaturation, setLightness, hsl }`。
+- **`components/color/ColorConverter.tsx`**：转换器面板。多格式输入框（带 label 与错误态）+ 滑块微调区（`requestAnimationFrame` 节流，60fps）。
+- **`components/color/ColorPreview.tsx`**：实时预览区。大色块点击复制 HEXA + Toast；两张样卡展示对白/黑背景的 WCAG 对比度评级与推荐文字色。
+- **`components/color/QuickExamples.tsx`**：快捷工具栏「快速示例」Tab。🎲 随机灵感（互补/类似/三角）+ 6 组精选调色板，点击任意色填充主转换器。
+- **`components/color/StandardColors.tsx`**：快捷工具栏「标准色表」Tab。CSS 命名色（支持搜索过滤）+ 216 Web 安全色网格，点击填充。
+- **`pages/ColorLabPage.tsx`**：主页面。三区块自适应布局（预览 / 转换器 / 快捷工具栏），工具栏在「快速示例」「标准色表」间切换；持有 `useColorConverter` 状态与 `toolTab` 状态。
+
+### 17. `router.tsx`（路由表）
 
 - **职责**：
   - `createBrowserRouter` 定义路由：`/` 根路径挂载 `App` 布局壳，子路由通过 `Layout` 中的 `<Outlet />` 渲染。
   - 根路径 `/` 与 404 通配 `*` 均重定向到 `/jwt`。
-  - 每个功能页面通过 `lazy()` 懒加载，配合 `Layout` 的 `<Suspense>` 边界，实现代码分包。
+  - 每个功能页面（JwtDecodePage / Base64Page / UrlCodecPage / ColorLabPage）通过 `lazy()` 懒加载，配合 `Layout` 的 `<Suspense>` 边界，实现代码分包。
 
-### 17. `config/menuItems.tsx`（菜单项配置）
+### 18. `config/menuItems.tsx`（菜单项配置）
 
 - **职责**：导出 `menuItems` 数组，每项包含 `{ path, label, icon }`，驱动 `MenuList` 渲染与路由导航。
-  后续新增功能只需在此追加一项。
+  后续新增功能只需在此追加一项（当前 4 项：JWT 解码 / Base64 / URL / 颜色实验室）。
 
-### 18. 功能页面
+### 19. 功能页面
 
 - **`JwtDecodePage.tsx`**：持有 `jwtInput` 状态，调用 `useJwt` Hook，协调 `JwtInput` / `JwtOutput` 的渲染。
   `JwtOutput` 通过 `lazy()` 懒加载。
 - **`Base64Page.tsx`**：包装 `CodecView`，注入 `encodeBase64` / `decodeBase64`，暴露「标准 / URL-safe」两种变体。
 - **`UrlCodecPage.tsx`**：包装 `CodecView`，注入 `encodeUrl` / `decodeUrl`，暴露「Component / URI」两种粒度。
+- **`ColorLabPage.tsx`**：颜色实验室主页面，持有 `useColorConverter` Hook，编排 `ColorPreview` / `ColorConverter` / `QuickExamples` / `StandardColors`。
+- **`ComingSoonPage.tsx`**：「功能开发中」占位页，预留给未来扩展（当前无路由直接指向）。
 
-### 19. `utils/base64.ts` / `utils/urlCodec.ts`（编解码工具函数）
+### 20. `utils/base64.ts` / `utils/urlCodec.ts`（编解码工具函数）
 
 - **`base64.ts`**：`encodeBase64` 以 `TextEncoder` 得到 UTF-8 字节后走 `btoa`，可选 URL-safe 变体；`decodeBase64` 兼容 URL-safe 字符集，自动补 `=`，对字符集、结构、UTF-8 三类错误分别抛出可读消息。
 - **`urlCodec.ts`**：`encodeUrl` / `decodeUrl`，`mode` 为 `'component'`（`encodeURIComponent`）或 `'uri'`（`encodeURI`）；解码遇到损坏的百分号转义时抛出可读错误。
@@ -233,15 +270,22 @@ jwtparse/
 [router.tsx] ──createBrowserRouter──> [App.tsx] ──> [Layout.tsx]  (主布局壳)
     │
     ├── / ──重定向──> /jwt
-    ├── /jwt ──lazy──> [JwtDecodePage.tsx]
-    ├── /base64 ──lazy──> [Base64Page.tsx] ──> [CodecView.tsx] + [utils/base64.ts]
-    └── /url    ──lazy──> [UrlCodecPage.tsx] ──> [CodecView.tsx] + [utils/urlCodec.ts]
+    ├── /jwt   ──lazy──> [JwtDecodePage.tsx] ──> [useJwt.ts] + [components/jwt/JwtInput.tsx] + lazy [components/jwt/JwtOutput.tsx]
+    ├── /base64 ──lazy──> [Base64Page.tsx] ──> [components/base/CodecView.tsx] + [utils/base64.ts]
+    ├── /url    ──lazy──> [UrlCodecPage.tsx] ──> [components/base/CodecView.tsx] + [utils/urlCodec.ts]
+    └── /color  ──lazy──> [ColorLabPage.tsx]
+                         ├──> [useColorConverter.ts] (utils/color/) ──> [convert.ts] + [types.ts]
+                         ├──> [components/color/ColorPreview.tsx]    ──> [convert.ts] (getContrastRating)
+                         ├──> [components/color/ColorConverter.tsx]  ──> [types.ts] + [useColorConverter.ts]
+                         ├──> [components/color/QuickExamples.tsx]   ──> [data.ts] + [convert.ts] (generateHarmony/randomHex)
+                         └──> [components/color/StandardColors.tsx]  ──> [data.ts] (NAMED_COLORS/WEB_SAFE_COLORS)
 
 [Layout.tsx]  ── 布局编排  ──
     ├── [Sidebar.tsx]  (响应式分发器)
     │   ├── lg+: [DesktopSidebar.tsx]  (可折叠，useSidebarCollapsed 持久化)
     │   │   ├── [Logo.tsx]
-    │   │   └── [MenuList.tsx]  ──menuItems──> [config/menuItems.tsx]
+    │   │   ├── [MenuList.tsx]  ──menuItems──> [config/menuItems.tsx]
+    │   │   └── useCollapseButtonVisibility.ts  (折叠按钮显隐)
     │   └── lg-: [MobileTopbar.tsx]  (汉堡菜单 + 下拉)
     │       ├── [Logo.tsx]
     │       └── [MenuList.tsx]
@@ -252,9 +296,9 @@ jwtparse/
 
 [JwtDecodePage.tsx]  ── 导入  ──> [useJwt.ts]  (Hook，纯逻辑)
     │
-    ├── 导入 ──> [JwtInput.tsx]  (受控输入 + 高亮叠层)
-    └── lazy ──> [JwtOutput.tsx]  (Shiki 高亮 + 状态动画)
-                     └── 导入 ──> [CopyButton.tsx]
+    ├── 导入 ──> [components/jwt/JwtInput.tsx]  (受控输入 + 高亮叠层)
+    └── lazy ──> [components/jwt/JwtOutput.tsx]  (Shiki 高亮 + 状态动画)
+                     └── 导入 ──> [components/base/CopyButton.tsx]
 
 [global.css]  ──由──> [entry.css] 通过 @theme 映射为 Tailwind 工具类，被各组件 className 引用
 ```
@@ -263,9 +307,12 @@ jwtparse/
 
 - `router.tsx` 是路由入口，`App.tsx` 仅渲染 `Layout.tsx`，`Layout.tsx` 编排布局壳与路由出口。
 - `Sidebar.tsx` 作为响应式分发器，桌面端 `DesktopSidebar` 支持折叠/展开（持久化 `localStorage`），移动端 `MobileTopbar` 使用汉堡菜单 + 下拉。
-- `AppToolbar.tsx` 替代原 `HeaderRight.tsx`，通过 `mobileActions` 插槽注入到移动端顶部条，避免移动端重复渲染顶部条。
+- `AppToolbar.tsx` 通过 `mobileActions` 插槽注入到移动端顶部条，避免移动端重复渲染顶部条。
 - `config/menuItems.tsx` 集中管理菜单项配置，后续新增功能只需追加路由与菜单项。
-- `useJwt.ts` 封装 JWT 解码业务逻辑，与 UI 解耦；`CodecView.tsx` 封装通用编解码双栏视图，供 Base64/URL 复用。
+- 组件按功能域分层：`components/base/`（通用基础组件）、`components/color/`（颜色实验室 UI）、`components/jwt/`（JWT UI）。
+- 业务逻辑与 UI 解耦：纯逻辑收口于 `utils/`（含 `utils/color/` 的 `convert.ts` / `data.ts` / `types.ts` 与 `hooks/`），UI 组件仅消费 Hook 暴露的状态，便于复用与单测。
+- 颜色实验室以 HEXA 字符串为唯一真值来源，所有格式由其派生，任意输入渠道变更均回到 HEXA 再扩散，保证状态一致。
+- `useJwt.ts` 封装 JWT 解码业务逻辑；`CodecView.tsx` 封装通用编解码双栏视图，供 Base64/URL 复用；`useColorConverter.ts` 封装颜色实验室状态。
 - 主题完全由 `global.css` 的 CSS 变量驱动（浅色 `:root` / 深色 `.dark`），组件仅使用语义化工具类，切换主题无需改动组件代码。
 - `JwtOutput` 懒加载，Shiki 高亮引擎按需加载 + `manualChunks` 单独拆包，控制主包体积。
 
@@ -273,11 +320,13 @@ jwtparse/
 
 - **品牌重塑**：从 "JWT Tools" 更名为「寒冰工具箱」（ICE），Logo 更换为 ICE 图标，localStorage key 前缀改为 `ice:`。
 - **布局重构**：`App.tsx` 简化为入口壳，新增 `Layout.tsx` 编排布局，`Sidebar` 拆分为 `DesktopSidebar` + `MobileTopbar` 响应式分发模式。
-- **侧边栏折叠**：新增 `useSidebarCollapsed` Hook，桌面端侧边栏支持折叠/展开，状态持久化 `localStorage`，带 `transition-[width]` 平滑动画。
-- **菜单项配置化**：新增 `config/menuItems.tsx` 集中管理菜单项，`MenuList` 组件驱动渲染。
+- **侧边栏折叠**：`useSidebarCollapsed` Hook 持久化折叠状态；新增 `useCollapseButtonVisibility` Hook，折叠态下折叠按钮 1s 后自动隐藏、悬停重现。
+- **菜单项配置化**：`config/menuItems.tsx` 集中管理菜单项，`MenuList` 组件驱动渲染。
 - **HeaderRight → AppToolbar**：重命名为 `AppToolbar`，支持 `mobileActions` 插槽注入，全屏逻辑抽为 `useFullscreen` Hook。
 - **图标抽离**：侧边栏用到的内联 SVG 图标抽为 `components/icons.tsx`，避免重复定义。
-- **语法高亮升级**：`JwtOutput` 改用 `react-shiki` 的 `ShikiHighlighter` 组件，支持 `light`/`dark` 双主题自动切换，替代旧版手动 `createHighlighterCore` 的 thunk 模式。
+- **目录按功能域重组**：`components/` 下细分 `base/`（CodecView、CopyButton）、`color/`、`jwt/`；`utils/` 下新增 `color/`（types/convert/data/useColorConverter）。旧 `src/color/` 整体迁移拆分至 `utils/color/` + `components/color/`。
+- **颜色实验室新增**：完整子模块，以 `utils/color/` 纯逻辑（`colord` 驱动）+ `components/color/` UI + `ColorLabPage` 页面组成；支持 HEX/HEXA ↔ RGB/RGBA ↔ HSL/HSLA 实时转换、WCAG 对比度检测、和谐配色生成与标准色表。
+- **语法高亮升级**：`JwtOutput` 改用 `react-shiki` 的 `ShikiHighlighter` 组件，支持 `light`/`dark` 双主题自动切换。
 - **CodecView 状态动画**：输出区改用 `AnimatePresence mode="wait"` 三态切换（error/empty/success），错误态附加抖动动画。
 - **构建优化**：`vite.config.ts` 设置 `target: 'es2020'`、`server.open: true`；`manualChunks` 将 react / motion / shiki 拆为独立 chunk。
 - **样式增强**：`entry.css` 新增 Shiki 双主题样式；`global.css` 新增 `--border-strong` 变量、`--radius` 变量、JWT 高亮工具类（`.text-jwt-header` 等）。
