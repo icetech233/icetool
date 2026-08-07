@@ -1,10 +1,13 @@
 /**
  * ColorLabPage —— 「颜色实验室」主页面。
  *
- * 布局（方案 A：三列增强 + 全宽工作区）：
- * - 桌面端（lg+）：左列预览 + 中列转换器 + 右列快捷工具栏（含 快速示例/标准色表/收藏/历史 4 个 Tab）。
- * - 全宽区：上排「配色方案推荐(左) + 色彩趋势(右)」双栏；下排瀑布流「随机灵感墙」。
- * - 移动端：上下堆叠。
+ * 布局（左右固定比例 + 左栏瀑布流）：
+ * - 整体为左右两栏，固定比例（桌面 lg: 左 7 / 右 5）。移动端上下堆叠。
+ * - 左栏：核心内容（实时预览 / 转换器 / 快速示例 / 配色推荐 / 色彩趋势），
+ *   以瀑布流（CSS columns）填充，高度自适应、无内部滚动条、无抖屏。
+ * - 右栏：固定区域，自上而下放置「工具箱（3 Tab）」与「随机灵感墙」。
+ *   工具箱位置恒定（不随左栏瀑布流流动），右栏拥有自身独立高度，
+ *   不会被左栏拖出大面积留白，切 Tab 也不位移。
  *
  * 数据持久化：收藏与历史均写入浏览器本地 IndexedDB，刷新不丢失。
  */
@@ -78,6 +81,27 @@ export default function ColorLabPage() {
     { key: 'history', label: '历史' },
   ];
 
+  // 统一卡片容器（标题 + 内容），用于瀑布流各模块
+  const Card = ({
+    title,
+    children,
+    className,
+  }: {
+    title: string;
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <div
+      className={[
+        'mb-6 break-inside-avoid rounded-2xl border border-border bg-card p-4 shadow-sm',
+        className ?? '',
+      ].join(' ')}
+    >
+      <h2 className="mb-3 text-sm font-semibold text-foreground">{title}</h2>
+      {children}
+    </div>
+  );
+
   return (
     <div className="flex flex-col gap-6">
       {/* 标题区 */}
@@ -89,27 +113,46 @@ export default function ColorLabPage() {
         </p>
       </header>
 
-      {/* 主体：三区块自适应布局 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        {/* 左：实时预览 */}
-        <section className="lg:col-span-4">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">实时预览</h2>
+      {/* 左右固定比例布局：左栏瀑布流核心内容，右栏固定放工具箱 + 灵感墙 */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
+        {/* 左栏：核心内容瀑布流（自适应列数，高度随内容，无内部滚动条） */}
+        <div className="min-w-0 columns-1 gap-6 md:columns-2 lg:flex-1 lg:columns-2 xl:columns-3">
+          {/* 实时预览 */}
+          <Card title="实时预览">
             <ColorPreview hexa={converter.values.hexa} onFavorite={handleFavoriteColor} />
-          </div>
-        </section>
+          </Card>
 
-        {/* 中：转换器 */}
-        <section className="lg:col-span-5">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">转换器</h2>
+          {/* 转换器 */}
+          <Card title="转换器">
             <ColorConverter converter={converter} />
-          </div>
-        </section>
+          </Card>
 
-        {/* 右：工具栏（3 个 Tab；固定高度可滚动，避免被中列等高拖出留白） */}
-        <section className="lg:col-span-3">
-          <div className="flex h-full flex-col rounded-2xl border border-border bg-card p-4 shadow-sm">
+          {/* 快速示例 */}
+          <Card title="快速示例">
+            <QuickExamples onPick={handlePick} />
+          </Card>
+
+          {/* 配色方案推荐 */}
+          <Card title="配色方案推荐">
+            <SchemeRecommend
+              currentHex={converter.values.hexa}
+              onPick={handlePick}
+              onApplyScheme={handleApplyScheme}
+              onFavoriteScheme={handleFavoriteScheme}
+            />
+          </Card>
+
+          {/* 色彩趋势 */}
+          <Card title="色彩趋势">
+            <ColorTrends refreshKey={refreshKey} />
+          </Card>
+        </div>
+
+        {/* 右栏（固定宽度）：工具箱 + 随机灵感墙，位置恒定、不随左栏流动 */}
+        <aside className="flex w-full flex-col gap-6 lg:w-[380px] lg:flex-none xl:w-[420px]">
+          {/* 工具箱（3 个 Tab，固定右上区域，切 Tab 不位移） */}
+          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <h2 className="mb-3 text-sm font-semibold text-foreground">工具箱</h2>
             <div className="mb-3 inline-flex w-full rounded-lg bg-muted p-1">
               {TABS.map((t) => (
                 <button
@@ -127,63 +170,28 @@ export default function ColorLabPage() {
               ))}
             </div>
 
-            {/* 固定高度 + 内部滚动，使右列始终"满"，无突兀空白 */}
-            <div className="min-h-0 flex-1 overflow-y-auto pr-1" style={{ maxHeight: '520px' }}>
-              {toolTab === 'standard' && <StandardColors onPick={handlePick} />}
-              {toolTab === 'favorites' && (
-                <FavoritesPanel
-                  currentHex={converter.values.hexa}
-                  onPick={handlePick}
-                  refreshKey={refreshKey}
-                />
-              )}
-              {toolTab === 'history' && <HistoryPanel onPick={handlePick} refreshKey={refreshKey} />}
-            </div>
+            {toolTab === 'standard' && <StandardColors onPick={handlePick} />}
+            {toolTab === 'favorites' && (
+              <FavoritesPanel
+                currentHex={converter.values.hexa}
+                onPick={handlePick}
+                refreshKey={refreshKey}
+              />
+            )}
+            {toolTab === 'history' && <HistoryPanel onPick={handlePick} refreshKey={refreshKey} />}
           </div>
-        </section>
-      </div>
 
-      {/* 快速示例：独立全宽 section（从右侧 Tab 拆出，宽度更充裕） */}
-      <section>
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">快速示例</h2>
-          <QuickExamples onPick={handlePick} />
-        </div>
-      </section>
-
-      {/* 全宽区：配色推荐 + 色彩趋势 双栏 */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-12">
-        <section className="lg:col-span-7">
+          {/* 随机灵感墙（右栏固定区域内，内部用瀑布流） */}
           <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">配色方案推荐</h2>
-            <SchemeRecommend
-              currentHex={converter.values.hexa}
-              onPick={handlePick}
+            <h2 className="mb-3 text-sm font-semibold text-foreground">随机灵感墙</h2>
+            <InspirationWall
               onApplyScheme={handleApplyScheme}
               onFavoriteScheme={handleFavoriteScheme}
+              injected={injectedScheme}
             />
           </div>
-        </section>
-
-        <section className="lg:col-span-5">
-          <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-            <h2 className="mb-3 text-sm font-semibold text-foreground">色彩趋势</h2>
-            <ColorTrends refreshKey={refreshKey} />
-          </div>
-        </section>
+        </aside>
       </div>
-
-      {/* 全宽区：瀑布流随机灵感墙（方案 B） */}
-      <section>
-        <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
-          <h2 className="mb-3 text-sm font-semibold text-foreground">随机灵感墙</h2>
-          <InspirationWall
-            onApplyScheme={handleApplyScheme}
-            onFavoriteScheme={handleFavoriteScheme}
-            injected={injectedScheme}
-          />
-        </div>
-      </section>
 
       {/* 全局 Toast */}
       {actions.toast && (
