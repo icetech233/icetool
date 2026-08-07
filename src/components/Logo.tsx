@@ -2,23 +2,28 @@
  * 应用 Logo：ICE 图标 + "寒冰工具箱" 文字。
  * 文字始终渲染，可通过 textClassName 控制显隐/过渡（如桌面端折叠动画）。
  */
+import { useId } from 'react';
+
 type LogoProps = {
   /** 文字部分的额外类名，用于承载 collapsed 过渡样式等 */
   textClassName?: string;
 };
 
 export default function Logo({ textClassName }: LogoProps) {
+  // 每个实例拿到唯一 id，避免页面内多个 <Logo />（桌面/移动）共用同一渐变 id
+  // 在 display:none 切换视口时引用失效导致方块变透明（表现为“白色看不清”）。
+  const gid = "ice-logo"+useId();
   return (
     <div className="flex items-center gap-2 min-w-0">
       <svg viewBox="0 0 28 28" width="28" height="28" className="h-8 w-8 shrink-0">
         <defs>
-          <linearGradient id="ice-logo" x1="0" y1="0" x2="1" y2="1">
+          <linearGradient id={gid} x1="0" y1="0" x2="1" y2="1">
             <stop offset="0" stopColor="#4cb8ff" />
             <stop offset="1" stopColor="#1d9bf0" />
           </linearGradient>
         </defs>
-        <rect width="28" height="28" rx="10" fill="url(#ice-logo)" />
-        <g stroke="#fff" strokeWidth="1.4" strokeLinecap="round" fill="none">
+        <rect width="28" height="28" rx="10" fill={`url(#${gid})`} />
+        <g stroke="#fff" strokeWidth="1.4" strokeLinecap="round" >
           <circle cx="14" cy="14" r="1.8" fill="#fff" stroke="none" />
           <g>
             <line x1="14" y1="14" x2="14" y2="5.5" />
