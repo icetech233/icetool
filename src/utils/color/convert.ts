@@ -107,31 +107,72 @@ export function getContrastRating(hex: string) {
 }
 
 /**
- * 根据基准色与协调方案生成一组和谐配色。
+ * 协调方案中文标签（供 UI 展示）。
  */
-export function generateHarmony(baseHex: string, type: 'complementary' | 'analogous' | 'triadic'): string[] {
+export const HARMONY_LABEL_MAP: Record<
+  'complementary' | 'analogous' | 'triadic' | 'splitComplementary' | 'monochromatic',
+  string
+> = {
+  complementary: '互补色',
+  analogous: '类似色',
+  triadic: '三角色',
+  splitComplementary: '分裂互补',
+  monochromatic: '单色阶',
+};
+
+/**
+ * 根据基准色与协调方案生成一组和谐配色。
+ * 支持 5 种经典色彩协调方案（扩展自原 complementary/analogous/triadic）。
+ */
+export function generateHarmony(
+  baseHex: string,
+  type:
+    | 'complementary'
+    | 'analogous'
+    | 'triadic'
+    | 'splitComplementary'
+    | 'monochromatic',
+): string[] {
   const base = colord(baseHex);
   const hsl = base.toHsl();
   const rotate = (deg: number) => (hsl.h + deg + 360) % 360;
+  const at = (deg: number) => toHexa(colord({ ...hsl, h: rotate(deg) }));
 
   switch (type) {
     case 'complementary':
-      return [baseHex, toHexa(colord({ ...hsl, h: rotate(180) }))];
+      return [baseHex, at(180)];
     case 'analogous':
-      return [
-        toHexa(colord({ ...hsl, h: rotate(-30) })),
-        baseHex,
-        toHexa(colord({ ...hsl, h: rotate(30) })),
-      ];
+      return [at(-30), baseHex, at(30)];
     case 'triadic':
+      return [baseHex, at(120), at(240)];
+    case 'splitComplementary':
+      return [baseHex, at(150), at(210)];
+    case 'monochromatic':
+      // 同色相、不同明度/饱和度，构成层次
       return [
+        toHexa(colord({ ...hsl, l: Math.max(20, hsl.l - 25) })),
+        toHexa(colord({ ...hsl, l: Math.max(35, hsl.l - 12) })),
         baseHex,
-        toHexa(colord({ ...hsl, h: rotate(120) })),
-        toHexa(colord({ ...hsl, h: rotate(240) })),
+        toHexa(colord({ ...hsl, l: Math.min(80, hsl.l + 12) })),
+        toHexa(colord({ ...hsl, s: Math.max(20, hsl.s - 20), l: Math.min(90, hsl.l + 20) })),
       ];
     default:
       return [baseHex];
   }
+}
+
+/**
+ * 计算一组颜色的色相分布直方图（H 0-360 均分 12 桶）。
+ * 用于「色彩趋势」本地统计展示。
+ */
+export function hueHistogram(hexList: string[], buckets = 12): number[] {
+  const counts = new Array(buckets).fill(0);
+  for (const hex of hexList) {
+    const h = colord(hex).toHsl().h; // 0-360
+    const idx = Math.min(buckets - 1, Math.floor((h / 360) * buckets));
+    counts[idx] += 1;
+  }
+  return counts;
 }
 
 /**

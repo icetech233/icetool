@@ -9,6 +9,7 @@ import { getContrastRating } from '../../utils/color/convert';
 
 type ColorPreviewProps = {
   hexa: string;
+  onFavorite?: (hexa: string) => void;
 };
 
 type RatingPill = {
@@ -41,7 +42,7 @@ function useCopyToast() {
   return { toast, copy };
 }
 
-export default function ColorPreview({ hexa }: ColorPreviewProps) {
+export default function ColorPreview({ hexa, onFavorite }: ColorPreviewProps) {
   const rating = getContrastRating(hexa);
   const { toast, copy } = useCopyToast();
 
@@ -77,6 +78,20 @@ export default function ColorPreview({ hexa }: ColorPreviewProps) {
         <span className="pointer-events-none rounded-md bg-black/10 px-3 py-1 text-sm font-medium text-white/90 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
           点击复制
         </span>
+        {onFavorite && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavorite(hexa);
+            }}
+            className="absolute right-3 top-3 rounded-full bg-black/30 px-2.5 py-1 text-xs font-medium text-white/90 backdrop-blur-sm transition-colors hover:bg-black/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+            title="收藏当前颜色"
+            aria-label="收藏当前颜色"
+          >
+            ★ 收藏
+          </button>
+        )}
       </button>
 
       {/* 对比度检测：两张样卡（白底 / 黑底） */}
