@@ -7,7 +7,7 @@ import { useSidebarCollapsed } from '../hooks/useSidebarCollapsed';
 /**
  * 桌面端侧边栏：logo + 菜单，可折叠/展开，状态由 useSidebarCollapsed 持久化到 localStorage。
  * 折叠按钮跨越侧边栏右边缘，左半部分嵌入菜单内，右半部分露出在菜单外。
- * 折叠后按钮2秒自动隐藏，鼠标悬浮菜单区域时按钮再次显示，带0.4秒过渡动画。
+ * 折叠后按钮1秒自动隐藏，鼠标悬浮菜单区域时按钮再次显示，带0.4秒过渡动画。
  */
 export default function DesktopSidebar() {
   const { collapsed, toggle } = useSidebarCollapsed();
@@ -25,19 +25,19 @@ export default function DesktopSidebar() {
   }, []);
 
   /**
-   * 启动2秒后隐藏按钮的定时器（仅在折叠状态下）
+   * 启动1秒后隐藏按钮的定时器（仅在折叠状态下）
    */
   const scheduleHide = useCallback(() => {
     clearHideTimer();
     hideTimerRef.current = setTimeout(() => {
       setButtonVisible(false);
-    }, 2000);
+    }, 1000);
   }, [clearHideTimer]);
 
   /**
    * 折叠状态变化时：
    * - 展开：按钮始终可见，清除定时器
-   * - 折叠：立即显示按钮，2秒后自动隐藏
+   * - 折叠：立即显示按钮，1秒后自动隐藏
    */
   useEffect(() => {
     if (collapsed) {
@@ -61,7 +61,7 @@ export default function DesktopSidebar() {
   }, [collapsed, clearHideTimer]);
 
   /**
-   * 鼠标离开侧边栏区域：折叠状态下重新启动3秒隐藏定时器
+   * 鼠标离开侧边栏区域：折叠状态下重新启动1秒隐藏定时器
    */
   const handleMouseLeave = useCallback(() => {
     if (collapsed) {
