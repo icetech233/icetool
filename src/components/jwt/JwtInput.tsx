@@ -12,10 +12,9 @@ interface JwtInputProps {
 }
 
 /**
- * 一个结构合法、可被正常解码的示例 JWT（签名部分为演示用占位，非真实签名）。
+ * A structurally valid sample JWT that decodes correctly.
+ * The signature is a placeholder for demonstration only, not a real signature.
  */
-
-// ewogICJzdWIiOiAiMTIzNDU2Nzg5MCIsCiAgIm5hbWUiOiAi5byg5LiJIiwKICAiaWF0IjogMTcwMDAwMDAwMCwKICAiZXhwIjogMTk4NTcxMjAwMCwKICAicm9sZSI6IFsKICAgICJhZG1pbiIsCiAgICAidXNlciIKICBdCn0.
 const SAMPLE_JWT =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.' +
   'eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IuW8oOS4iSIsImlhdCI6MTcwMDAwMDAwMCwiZXhwIjoxOTg1NzEyMDAwLCJyb2xlIjpbImFkbWluIiwidXNlciJdfQ.' +

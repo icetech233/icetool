@@ -1,18 +1,20 @@
 /**
- * 应用 Logo：ICE 图标 + "寒冰工具箱" 文字。
- * 文字始终渲染，可通过 textClassName 控制显隐/过渡（如桌面端折叠动画）。
+ * App Logo: ICE icon + "寒冰工具箱" text.
+ * The text is always rendered and can be toggled/animated via textClassName
+ * (e.g. the desktop collapse animation).
  */
 import { useId } from 'react';
 
 type LogoProps = {
-  /** 文字部分的额外类名，用于承载 collapsed 过渡样式等 */
+  /** Extra class name for the text part, used for collapsed transition styles etc. */
   textClassName?: string;
 };
 
 export default function Logo({ textClassName }: LogoProps) {
-  // 每个实例拿到唯一 id，避免页面内多个 <Logo />（桌面/移动）共用同一渐变 id
-  // 在 display:none 切换视口时引用失效导致方块变透明（表现为“白色看不清”）。
-  const gid = "ice-logo"+useId();
+  // Each instance gets a unique id so multiple <Logo /> on the page (desktop/mobile)
+  // don't share the same gradient id, which would break the reference when toggling
+  // display:none across viewports (appearing as an invisible/transparent block).
+  const gid = "ice-logo" + useId();
   return (
     <div className="flex items-center gap-2 min-w-0">
       <svg viewBox="0 0 28 28" width="28" height="28" className="h-8 w-8 shrink-0">
