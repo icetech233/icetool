@@ -23,7 +23,7 @@
 ## 文件结构与模块职责
 
 ```
-jwtparse/
+icetool/
 ├── package.json            # 依赖与脚本
 ├── vite.config.ts          # Vite 构建配置（React 插件 + `@` 别名 + 手动拆包 + es2020 target）
 ├── postcss.config.js       # PostCSS 配置（Tailwind v4）
@@ -45,10 +45,16 @@ jwtparse/
     │   ├── base/           # 通用基础组件
     │   │   ├── CodecView.tsx   # 通用「编解码」双栏视图（三态动画，供 Base64/URL 复用）
     │   │   └── CopyButton.tsx  # 通用复制按钮（写剪贴板 + 复制反馈）
-    │   ├── color/          # 颜色实验室专属组件
-    │   │   ├── ColorPreview.tsx    # 实时预览 + WCAG 对比度评级
-    │   │   ├── ColorConverter.tsx  # 转换器面板（多格式输入 + 滑块微调）
+    │   ├── color/          # 颜色实验室专属组件（共 10 个）
+    │   │   ├── ColorPreview.tsx    # 实时预览 + WCAG 对比度评级 + 点击复制 + 收藏
+    │   │   ├── ColorConverter.tsx  # 转换器面板（HEX/HEXA/RGB/RGBA/HSL/HSLA 多格式输入 + 滑块微调）
+    │   │   ├── ColorSwatch.tsx     # 可复用单色块（点击回填 / 双击复制）
+    │   │   ├── ColorTrends.tsx     # 色彩趋势（本地历史色相分布直方图）
+    │   │   ├── FavoritesPanel.tsx  # 收藏夹面板（单色 / 配色方案）
+    │   │   ├── HistoryPanel.tsx    # 历史记录面板（倒序展示 + 清空）
+    │   │   ├── InspirationWall.tsx # 随机灵感墙（瀑布流配色卡片）
     │   │   ├── QuickExamples.tsx   # 快捷工具栏：随机灵感 + 精选调色板
+    │   │   ├── SchemeRecommend.tsx # 配色方案推荐（5 种协调方案）
     │   │   └── StandardColors.tsx  # 快捷工具栏：CSS 命名色 + Web 安全色
     │   ├── jwt/            # JWT 解码专属组件
     │   │   ├── JwtInput.tsx    # JWT 输入组件（文本域 + 实时语法高亮叠层）
@@ -74,11 +80,14 @@ jwtparse/
         ├── base64.ts            # UTF-8 安全的 Base64 编解码（含 URL-safe 变体、错误分类）
         ├── urlCodec.ts          # URL 编解码（Component / URI 两种粒度）
         ├── useCollapseButtonVisibility.ts # 折叠态下折叠按钮自动隐藏/悬停显示的 Hook
-        └── color/               # 颜色实验室纯逻辑（与 UI 解耦，便于复用与单测）
-            ├── types.ts             # 颜色核心类型（ColorFormat / ColorValues / ParseResult 等）
-            ├── convert.ts           # 纯函数：格式解析、真值派生、对比度、和谐配色、随机色
-            ├── data.ts              # 静态数据：精选调色板、CSS 命名色（148）、Web 安全色（216）
-            └── useColorConverter.ts # 核心状态容器 Hook：以 HEXA 为真值派生所有格式
+        ├── color/               # 颜色实验室纯逻辑（与 UI 解耦，便于复用与单测）
+        │   ├── types.ts             # 颜色核心类型（ColorFormat / ColorValues / ParseResult / FavoriteItem / HistoryItem 等）
+        │   ├── convert.ts           # 纯函数：格式解析、真值派生、对比度、和谐配色、随机色（基于 colord）
+        │   ├── data.ts              # 静态数据：精选调色板、CSS 命名色（148）、Web 安全色（216）
+        │   ├── useColorConverter.ts # 核心状态容器 Hook：以 HEXA 为真值派生所有格式
+        │   └── useColorLabActions.ts# 副作用聚合 Hook：收藏 / 历史写入（带节流）/ 复制 Toast
+        └── storage/
+            └── colorDB.ts        # 颜色历史 / 收藏的 IndexedDB 读写（addHistory / listHistory / addFavorite / listFavorites / removeFavorite / clearHistory）
 ```
 
 ### 样式系统（Tailwind v4 CSS-first）
@@ -229,11 +238,17 @@ jwtparse/
   - `randomHex()` / `isValidColor()`：随机色与安全校验。
 - **`utils/color/data.ts`**：静态数据——6 组精选调色板、148 个 CSS 标准命名色、216 个 Web 安全色网格。
 - **`utils/color/useColorConverter.ts`**：核心状态容器 Hook。以 HEXA 真值为唯一来源，派生所有格式；任一格式输入变更即解析为 HEXA 并同步其余；滑块基于当前真值微调 H/S/L/Alpha；非法输入容错（保留上次有效值 + error 提示）。返回 `{ hex, values, error, lastEdited, setFormat, setHex, setAlpha, setHue, setSaturation, setLightness, hsl }`。
-- **`components/color/ColorConverter.tsx`**：转换器面板。多格式输入框（带 label 与错误态）+ 滑块微调区（`requestAnimationFrame` 节流，60fps）。
-- **`components/color/ColorPreview.tsx`**：实时预览区。大色块点击复制 HEXA + Toast；两张样卡展示对白/黑背景的 WCAG 对比度评级与推荐文字色。
+- **`components/color/ColorConverter.tsx`**：转换器面板。6 个格式输入框（HEX / HEXA / RGB / RGBA / HSL / HSLA，各带复制按钮）+ 滑块微调区（透明度 / H / S / L，`requestAnimationFrame` 节流，60fps）；非法输入保留上次有效值并高亮提示。
+- **`components/color/ColorPreview.tsx`**：实时预览区。大色块点击复制 HEXA + Toast；两张样卡展示对白/黑背景的 WCAG 对比度评级与推荐文字色；支持一键收藏。
+- **`components/color/ColorSwatch.tsx`**：可复用原子色块组件，跨面板复用；点击 `onPick` 回填主转换器，双击 `onCopy` 复制。
+- **`components/color/ColorTrends.tsx`**：色彩趋势面板，基于本地历史（`listHistory(200)`）统计色相分布直方图（12 桶），无图表库依赖。
+- **`components/color/FavoritesPanel.tsx`**：收藏夹面板（右侧 Tab），展示单色收藏与配色方案收藏，可移除。
+- **`components/color/HistoryPanel.tsx`**：历史记录面板（右侧 Tab），倒序展示历史色值，支持清空。
+- **`components/color/InspirationWall.tsx`**：随机灵感墙，瀑布流配色卡片，点击应用首色或收藏整组。
 - **`components/color/QuickExamples.tsx`**：快捷工具栏「快速示例」Tab。🎲 随机灵感（互补/类似/三角）+ 6 组精选调色板，点击任意色填充主转换器。
+- **`components/color/SchemeRecommend.tsx`**：配色方案推荐，基于主色实时生成 5 种协调方案（complementary / analogous / triadic / splitComplementary / monochromatic），可应用首色或收藏整组。
 - **`components/color/StandardColors.tsx`**：快捷工具栏「标准色表」Tab。CSS 命名色（支持搜索过滤）+ 216 Web 安全色网格，点击填充。
-- **`pages/ColorLabPage.tsx`**：主页面。三区块自适应布局（预览 / 转换器 / 快捷工具栏），工具栏在「快速示例」「标准色表」间切换；持有 `useColorConverter` 状态与 `toolTab` 状态。
+- **`pages/ColorLabPage.tsx`**：主页面。三区块自适应布局（预览 / 转换器 / 快捷工具栏），工具栏在「快速示例」「标准色表」间切换；持有 `useColorConverter` 状态、`useColorLabActions` 副作用与 `refreshKey` 刷新键，右侧 Tab 在「收藏夹」「历史」间切换。
 
 ### 17. `router.tsx`（路由表）
 
@@ -275,8 +290,15 @@ jwtparse/
     ├── /url    ──lazy──> [UrlCodecPage.tsx] ──> [components/base/CodecView.tsx] + [utils/urlCodec.ts]
     └── /color  ──lazy──> [ColorLabPage.tsx]
                          ├──> [useColorConverter.ts] (utils/color/) ──> [convert.ts] + [types.ts]
-                         ├──> [components/color/ColorPreview.tsx]    ──> [convert.ts] (getContrastRating)
+                         ├──> [useColorLabActions.ts] (utils/color/) ──> [storage/colorDB.ts] (IndexedDB)
+                         ├──> [components/color/ColorPreview.tsx]    ──> [convert.ts] (getContrastRating) + [useColorLabActions.ts] (copy/favorite)
                          ├──> [components/color/ColorConverter.tsx]  ──> [types.ts] + [useColorConverter.ts]
+                         ├──> [components/color/ColorSwatch.tsx]     ──> 复用组件（onPick/onCopy）
+                         ├──> [components/color/ColorTrends.tsx]     ──> [storage/colorDB.ts] (listHistory) + [convert.ts] (hueHistogram)
+                         ├──> [components/color/FavoritesPanel.tsx]  ──> [storage/colorDB.ts] + [useColorLabActions.ts]
+                         ├──> [components/color/HistoryPanel.tsx]    ──> [storage/colorDB.ts] + [useColorLabActions.ts]
+                         ├──> [components/color/InspirationWall.tsx] ──> [convert.ts] (generateHarmony/randomHex) + [useColorLabActions.ts]
+                         ├──> [components/color/SchemeRecommend.tsx] ──> [convert.ts] (generateHarmony) + [useColorLabActions.ts]
                          ├──> [components/color/QuickExamples.tsx]   ──> [data.ts] + [convert.ts] (generateHarmony/randomHex)
                          └──> [components/color/StandardColors.tsx]  ──> [data.ts] (NAMED_COLORS/WEB_SAFE_COLORS)
 
@@ -330,3 +352,4 @@ jwtparse/
 - **CodecView 状态动画**：输出区改用 `AnimatePresence mode="wait"` 三态切换（error/empty/success），错误态附加抖动动画。
 - **构建优化**：`vite.config.ts` 设置 `target: 'es2020'`、`server.open: true`；`manualChunks` 将 react / motion / shiki 拆为独立 chunk。
 - **样式增强**：`entry.css` 新增 Shiki 双主题样式；`global.css` 新增 `--border-strong` 变量、`--radius` 变量、JWT 高亮工具类（`.text-jwt-header` 等）。
+- **颜色实验室扩展**：页面新增「收藏夹 / 历史」右侧 Tab 与「灵感墙」面板。新增 `useColorLabActions.ts` 聚合收藏 / 历史写入（带 800ms 同色节流）/ 复制 Toast 等副作用；新增 `storage/colorDB.ts`（IndexedDB）持久化历史与收藏；新增 `ColorSwatch` / `ColorTrends` / `FavoritesPanel` / `HistoryPanel` / `InspirationWall` / `SchemeRecommend` 六个组件，配色方案从 3 种扩展为 5 种（新增 splitComplementary / monochromatic）。
