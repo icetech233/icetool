@@ -2,4 +2,4 @@ User-agent: *
 Allow: /
 
 # 站点地图位置
-Sitemap: https://jwtparse.vercel.app/sitemap.xml
+Sitemap: https://icetool.vercel.app/sitemap.xml

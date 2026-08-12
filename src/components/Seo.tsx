@@ -11,7 +11,7 @@ type SeoProps = {
   path?: string;
 };
 
-const SITE_ORIGIN = 'https://jwtparse.vercel.app';
+const SITE_ORIGIN = 'https://icetool.vercel.app';
 
 function upsertMeta(selector: string, attr: 'name' | 'property', key: string, content: string) {
   let el = document.head.querySelector<HTMLMetaElement>(selector);

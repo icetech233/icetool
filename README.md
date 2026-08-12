@@ -1,11 +1,12 @@
 # 寒冰工具箱 (ice-tool)
 
-一个面向开发者的在线编解码工具集，支持 **JWT 解码**、**Base64 编解码**、**URL 编解码**。
+一个面向开发者的在线编解码工具集，支持 **JSON 实验室**、**JWT 解码**、**Base64 编解码**、**URL 编解码**、**颜色实验室**。
 
 > 所有数据均在浏览器本地处理，不会上传到任何服务器，安全、隐私、开箱即用。
 
 ## ✨ 功能特性
 
+- **JSON 实验室**：集清理空字段、压缩转义、结构解析可视化（支持局部全屏）、多种缩进格式化于一体的四合一工具。
 - **JWT 解码**：实时解析 `header.payload.signature` 三段结构，自动格式化 JSON，正确处理中文等多字节 UTF-8 字符。
 - **Base64 编解码**：UTF-8 安全的 Base64 编解码，支持 URL-safe 变体（`-`/`_` 替换 `+`/`/`，去除 `=` 填充）。
 - **URL 编解码**：提供两种粒度 —— 组件级（`encodeURIComponent`）与完整 URI 级（`encodeURI`），对损坏的转义序列给出可读错误。
@@ -81,9 +82,11 @@ npm run typecheck
 ├── index.html              # 应用入口 HTML（含主题防闪屏脚本、SEO/OG 元信息）
 ├── src/
 │   ├── pages/              # 路由页面
+│   │   ├── JsonLabPage.tsx     # JSON 实验室
 │   │   ├── JwtDecodePage.tsx   # JWT 解码页
 │   │   ├── Base64Page.tsx      # Base64 编解码页
 │   │   ├── UrlCodecPage.tsx    # URL 编解码页
+│   │   ├── ColorLabPage.tsx    # 颜色实验室
 │   │   └── ComingSoonPage.tsx  # 即将上线占位页
 │   ├── components/         # UI 组件（侧边栏、工具栏、JWT 输入/输出、复制按钮等）
 │   ├── hooks/              # 自定义 Hook（useJwt、useSidebarCollapsed、useFullscreen）

@@ -1,0 +1,31 @@
+{
+  "name": "寒冰工具箱",
+  "short_name": "寒冰工具箱",
+  "description": "在线开发者编解码工具集，支持 JWT 解码、Base64 编解码、URL 编解码、颜色转换，所有数据本地处理不出浏览器",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1d9bf0",
+  "orientation": "any",
+  "lang": "zh-CN",
+  "icons": [
+    {
+      "src": "/ice-tool-icon.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/ice-tool-icon-180x180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    },
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["developer tools", "utilities"],
+  "screenshots": []
+}

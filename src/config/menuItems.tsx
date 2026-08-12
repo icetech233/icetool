@@ -8,6 +8,16 @@ export type MenuItem = {
 
 export const menuItems: MenuItem[] = [
   {
+    path: '/json',
+    label: 'JSON 实验室',
+    icon: (
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M8 3H6a2 2 0 0 0-2 2v4a2 2 0 0 1-2 2 2 2 0 0 1 2 2v4a2 2 0 0 0 2 2h2" />
+        <path d="M16 3h2a2 2 0 0 1 2 2v4a2 2 0 0 0 2 2 2 2 0 0 0-2 2v4a2 2 0 0 1-2 2h-2" />
+      </svg>
+    ),
+  },
+  {
     path: '/jwt',
     label: 'JWT 解码',
     icon: (
@@ -50,5 +60,5 @@ export const menuItems: MenuItem[] = [
         <path d="M12 22a10 10 0 1 1 0-20c3 0 5 1.5 5 4 0 2-1.5 3-3 3h-2a2 2 0 0 0-2 2v2c0 1.5 1 3 3 3h3a3 3 0 0 0 3-3c0-2-1.5-3-3-3" />
       </svg>
     ),
-  },
+  }
 ];
