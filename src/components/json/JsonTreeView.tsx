@@ -172,6 +172,10 @@ function JsonNode({ value, path, keyName, isLast, collapsed, onToggle }: NodePro
     );
   }
 
+  if (typeof value === 'string') {
+    return <StringNode value={value} keyName={keyName} isLast={isLast} />;
+  }
+
   return (
     <div className="whitespace-pre-wrap break-all">
       {keyName !== undefined && <KeyLabel name={keyName} />}
@@ -179,6 +183,123 @@ function JsonNode({ value, path, keyName, isLast, collapsed, onToggle }: NodePro
       {!isLast && <Punct>,</Punct>}
     </div>
   );
+}
+
+interface StringNodeProps {
+  value: string;
+  keyName?: string;
+  isLast: boolean;
+}
+
+function StringNode({ value, keyName, isLast }: StringNodeProps) {
+  const [destructured, setDestructured] = useState<{ parsed: unknown } | null>(null);
+  const [parseError, setParseError] = useState<string | null>(null);
+
+  const canDestructure = useMemo(() => looksLikeJsonString(value), [value]);
+
+  const handleDestructure = () => {
+    try {
+      const parsed = JSON.parse(value);
+      if (parsed === null || typeof parsed !== 'object') {
+        setParseError('解构结果不是对象或数组');
+        return;
+      }
+      setDestructured({ parsed });
+      setParseError(null);
+    } catch (err) {
+      setParseError(err instanceof Error ? err.message : String(err));
+    }
+  };
+
+  if (destructured) {
+    return (
+      <DestructuredStringNode
+        value={destructured.parsed}
+        keyName={keyName}
+        isLast={isLast}
+        onRestore={() => setDestructured(null)}
+      />
+    );
+  }
+
+  return (
+    <div className="group whitespace-pre-wrap break-all">
+      {keyName !== undefined && <KeyLabel name={keyName} />}
+      {canDestructure && (
+        <button
+          type="button"
+          onClick={handleDestructure}
+          className="mr-2 hidden items-center gap-1 rounded border border-orange-400 bg-orange-50 px-2 py-0.5 text-xs font-medium leading-none text-orange-600 align-middle shadow-sm hover:bg-orange-100 hover:border-orange-500 dark:bg-orange-500/15 dark:border-orange-500/60 dark:text-orange-300 dark:hover:bg-orange-500/25 group-hover:inline-flex"
+          title="尝试将该字符串解析为 JSON 并展开"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+            <path d="M8 3H5a2 2 0 0 0-2 2v3" />
+            <path d="M21 8V5a2 2 0 0 0-2-2h-3" />
+            <path d="M3 16v3a2 2 0 0 0 2 2h3" />
+            <path d="M16 21h3a2 2 0 0 0 2-2v-3" />
+          </svg>
+          解构 JSON String
+        </button>
+      )}
+      <span className="text-accent">&quot;{escapeString(value)}&quot;</span>
+      {!isLast && <Punct>,</Punct>}
+      {parseError && (
+        <span className="ml-2 text-xs text-red-500 dark:text-red-400">解构失败：{parseError}</span>
+      )}
+    </div>
+  );
+}
+
+interface DestructuredStringNodeProps {
+  value: unknown;
+  keyName?: string;
+  isLast: boolean;
+  onRestore: () => void;
+}
+
+function DestructuredStringNode({ value, keyName, isLast, onRestore }: DestructuredStringNodeProps) {
+  const [collapsed, setCollapsed] = useState<Set<string>>(() => new Set());
+  const toggle = (path: string) => {
+    setCollapsed((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) next.delete(path);
+      else next.add(path);
+      return next;
+    });
+  };
+
+  return (
+    <div className="group">
+      <div className="relative rounded border border-dashed border-border/70 bg-background/40 pl-2 pr-2 py-1 my-0.5">
+        <div className="mb-1 flex items-center gap-2 text-[11px] text-muted-foreground">
+          <span className="italic">↳ 已解构的 JSON String</span>
+          <button
+            type="button"
+            onClick={onRestore}
+            className="underline decoration-dotted hover:text-primary"
+            title="还原为原始字符串"
+          >
+            还原
+          </button>
+        </div>
+        <JsonNode
+          value={value}
+          keyName={keyName}
+          path="$destructured"
+          isLast
+          collapsed={collapsed}
+          onToggle={toggle}
+        />
+      </div>
+      {!isLast && <Punct>,</Punct>}
+    </div>
+  );
+}
+
+function looksLikeJsonString(input: string): boolean {
+  const trimmed = input.trim();
+  if (trimmed.length < 2) return false;
+  return trimmed.startsWith('{"') || trimmed.startsWith('[');
 }
 
 interface ContainerNodeProps {

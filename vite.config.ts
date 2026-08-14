@@ -9,7 +9,7 @@ export default defineConfig({
     // 生成 .br（brotli）压缩文件
     compression({
       algorithms: ['brotliCompress'],
-      include: [/\.(js|mjs|json|css|html|svg|ico|txt)$/],
+      include: [/\.(js|mjs|json|css|html|svg|ico|txt|xml)$/],
       threshold: 0,
       deleteOriginalAssets: false,
     }),
@@ -26,9 +26,11 @@ export default defineConfig({
     include: ['motion'],
   },
   build: {
-    target: 'es2020',
+    target: 'es2021',
     rollupOptions: {
       output: {
+        chunkFileNames: 'assets/[hash].js',
+        entryFileNames: 'assets/chunk-[hash].js',
         manualChunks(id) {
           if (id.includes('node_modules')) {
             if (/[\\/]node_modules[\\/](react|react-dom|scheduler)[\\/]/.test(id)) {

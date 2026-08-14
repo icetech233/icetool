@@ -5,6 +5,7 @@
  * of the input area, but delegates the actual decoding logic.
  */
 import { useRef } from 'react';
+import Tooltip from '@/components/base/Tooltip';
 
 interface JwtInputProps {
   value: string;
@@ -68,20 +69,21 @@ export function JwtInput({ value, onChange }: JwtInputProps) {
       <div className="flex items-center gap-2 mb-3">
         <label className="block text-sm font-medium text-foreground">JWT 输入</label>
         <div className="ml-auto flex items-center gap-2">
-          <button
-            type="button"
-            onClick={loadSample}
-            className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/20 transition-colors hover:bg-primary/20 active:bg-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
-            title="填入一个可正常解码的示例 Token"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M14 3v4a1 1 0 0 0 1 1h4" />
-              <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
-              <path d="M9 13h6" />
-              <path d="M9 17h3" />
-            </svg>
-            <span>加载示例</span>
-          </button>
+          <Tooltip title="填入一个可正常解码的示例 Token">
+            <button
+              type="button"
+              onClick={loadSample}
+              className="inline-flex items-center gap-1 rounded-md px-3 py-1.5 text-xs font-medium text-primary bg-primary/10 border border-primary/20 transition-colors hover:bg-primary/20 active:bg-primary/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50"
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M14 3v4a1 1 0 0 0 1 1h4" />
+                <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
+                <path d="M9 13h6" />
+                <path d="M9 17h3" />
+              </svg>
+              <span>加载示例</span>
+            </button>
+          </Tooltip>
           <button
             type="button"
             onClick={clear}

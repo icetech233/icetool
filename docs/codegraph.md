@@ -25,7 +25,7 @@
 ```
 icetool/
 ├── package.json            # 依赖与脚本
-├── vite.config.ts          # Vite 构建配置（React 插件 + `@` 别名 + 手动拆包 + es2020 target）
+├── vite.config.ts          # Vite 构建配置（React 插件 + `@` 别名 + 手动拆包 + es2021 target）
 ├── postcss.config.js       # PostCSS 配置（Tailwind v4）
 ├── tsconfig.json           # TypeScript 配置
 ├── index.html              # HTML 模板（含首绘前同步主题的内联脚本，localStorage key: ice:theme）
@@ -107,7 +107,7 @@ icetool/
 
 - `@` → `./src` 路径别名；`resolve.dedupe: ['react','react-dom']` 防止 motion 预构建时打入第二份 React。
 - `optimizeDeps.include: ['motion']` 预构建动画库。
-- `build.target: 'es2020'`；`server.open: true` 自动打开浏览器。
+- `build.target: 'es2021'`；`server.open: true` 自动打开浏览器。
 - `build.rollupOptions.output.manualChunks` 将 `react/react-dom/scheduler`、`motion`、`shiki/@shikijs` 分别拆为独立 chunk。
 
 ## 核心组件与数据流
@@ -350,6 +350,6 @@ icetool/
 - **颜色实验室新增**：完整子模块，以 `utils/color/` 纯逻辑（`colord` 驱动）+ `components/color/` UI + `ColorLabPage` 页面组成；支持 HEX/HEXA ↔ RGB/RGBA ↔ HSL/HSLA 实时转换、WCAG 对比度检测、和谐配色生成与标准色表。
 - **语法高亮升级**：`JwtOutput` 改用 `react-shiki` 的 `ShikiHighlighter` 组件，支持 `light`/`dark` 双主题自动切换。
 - **CodecView 状态动画**：输出区改用 `AnimatePresence mode="wait"` 三态切换（error/empty/success），错误态附加抖动动画。
-- **构建优化**：`vite.config.ts` 设置 `target: 'es2020'`、`server.open: true`；`manualChunks` 将 react / motion / shiki 拆为独立 chunk。
+- **构建优化**：`vite.config.ts` 设置 `target: 'es2021'`、`server.open: true`；`manualChunks` 将 react / motion / shiki 拆为独立 chunk。
 - **样式增强**：`entry.css` 新增 Shiki 双主题样式；`global.css` 新增 `--border-strong` 变量、`--radius` 变量、JWT 高亮工具类（`.text-jwt-header` 等）。
 - **颜色实验室扩展**：页面新增「收藏夹 / 历史」右侧 Tab 与「灵感墙」面板。新增 `useColorLabActions.ts` 聚合收藏 / 历史写入（带 800ms 同色节流）/ 复制 Toast 等副作用；新增 `storage/colorDB.ts`（IndexedDB）持久化历史与收藏；新增 `ColorSwatch` / `ColorTrends` / `FavoritesPanel` / `HistoryPanel` / `InspirationWall` / `SchemeRecommend` 六个组件，配色方案从 3 种扩展为 5 种（新增 splitComplementary / monochromatic）。
