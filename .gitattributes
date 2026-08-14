@@ -1,0 +1,8 @@
+*.md text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.json text eol=crlf
+*.go text eol=crlf
+
+*.png binary
+*.jpg binary
