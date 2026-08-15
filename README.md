@@ -29,22 +29,18 @@
 ### 环境要求
 
 - Node.js（推荐使用 [Bun](https://bun.sh) 以获得最佳体验）
-- 包管理器：Bun / npm / pnpm / yarn
+- 包管理器：Bun / pnpm
 
 ### 安装依赖
 
 ```bash
-bun install
-# 或
-npm install
+bun i
 ```
 
 ### 本地开发
 
 ```bash
 bun dev
-# 或
-npm run dev
 ```
 
 启动后访问终端输出的本地地址（默认 `http://localhost:5173`）。
@@ -53,8 +49,6 @@ npm run dev
 
 ```bash
 bun build
-# 或
-npm run build
 ```
 
 构建前会执行 TypeScript 类型检查（`tsc --noEmit`），产物输出到 `dist/` 目录。
@@ -63,16 +57,12 @@ npm run build
 
 ```bash
 bun preview
-# 或
-npm run preview
 ```
 
 ### 类型检查
 
 ```bash
 bun typecheck
-# 或
-npm run typecheck
 ```
 
 ## 📁 项目结构
@@ -113,7 +103,7 @@ npm run typecheck
 使用以下命令生成静态产物后，将 `dist/` 目录部署即可：
 
 ```bash
-bun build
+bun run build
 ```
 
 ## 📄 许可证

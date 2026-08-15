@@ -1,0 +1,34 @@
+# 默认行为：自动检测文本文件并规范化换行符
+* text=auto
+
+# 源代码和配置文件统一使用 LF
+*.java text eol=lf
+*.js text eol=lf
+*.ts text eol=lf
+*.py text eol=lf
+*.go text eol=lf
+*.vue text eol=lf
+*.jsx text eol=lf
+*.tsx text eol=lf
+*.json text eol=lf
+*.xml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.css text eol=lf
+*.scss text eol=lf
+*.html text eol=lf
+*.md text eol=lf
+*.sh text eol=lf
+
+# Windows 批处理文件必须使用 CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.pdf binary
+*.jar binary
+*.war binary

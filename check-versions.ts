@@ -17,16 +17,30 @@ interface PackageInfo {
     latestVersion: string | null;
     error?: string;
 }
-
 async function checkLatestVersion(packageName: string): Promise<string | null> {
     try {
-        const response = await fetch(`https://unpkg.com/${packageName}/package.json`);
-        if (!response.ok) {
-            console.log(`⚠️  包 "${packageName}" 未找到或请求失败 (状态码: ${response.status})`);
+        const url = `https://unpkg.com/${packageName}`;
+        const response = await fetch(url, {
+            redirect: 'manual',
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36'
+            }
+        });
+
+        if (response.status === 302 || response.status === 301) {
+            const location = response.headers.get('location');
+            if (location) {
+                const atIndex = location.lastIndexOf('@');
+                if (atIndex !== -1) {
+                    // split('/')[0] 兜底，无论尾部有没有 / 或 /index.js 都能正确提取
+                    return location.slice(atIndex + 1).split('/')[0];
+                }
+            }
+            console.log(`⚠️  包 "${packageName}" 重定向但无法解析版本号: ${location}`);
             return null;
         }
-        const data = await response.json() as { version?: string };
-        return data.version || null;
+        console.log(`⚠️  包 "${packageName}" 未找到或请求失败 (状态码: ${response.status})`);
+        return null;
     } catch (error) {
         console.error(`❌ 检查包 "${packageName}" 时出错:`, error instanceof Error ? error.message : String(error));
         return null;
@@ -38,7 +52,7 @@ async function checkAllDependencies(): Promise<void> {
         // 读取并解析 package.json
         const packageJsonPath = path.join(__dirname, 'package.json');
         const packageJson = JSON.parse(readFileSync(packageJsonPath, 'utf-8')) as PackageJson;
-        
+
         const allDeps = { ...packageJson.dependencies, ...packageJson.devDependencies };
         const packageNames = Object.keys(allDeps);
 
@@ -54,7 +68,7 @@ async function checkAllDependencies(): Promise<void> {
         for (const name of packageNames) {
             const latestVersion = await checkLatestVersion(name);
             const currentVersion = allDeps[name] || '未知';
-            
+
             results.push({
                 name,
                 currentVersion,
@@ -69,8 +83,8 @@ async function checkAllDependencies(): Promise<void> {
             } else {
                 console.log(`📦 ${name}: 当前版本 ${currentVersion} → ❌ 无法获取最新版本`);
             }
-            
-            // 加入短暂延迟，避免请求过快
+
+            // 加入短暂延迟，避免请求过快被限流
             await new Promise(resolve => setTimeout(resolve, 100));
         }
 
@@ -82,7 +96,7 @@ async function checkAllDependencies(): Promise<void> {
             if (!r.latestVersion) return false;
             return r.currentVersion.replace(/^[\^~]/, '') !== r.latestVersion;
         }).length;
-        
+
         console.log(`📊 统计: 总共 ${total} 个包, 成功检查 ${success} 个, 其中 ${outdated} 个可更新`);
 
     } catch (error) {
