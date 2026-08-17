@@ -183,6 +183,7 @@ export default function DiffPage() {
           onChange={setLanguage}
           options={LANGUAGES}
           ariaLabel="语法高亮语言"
+          searchable
         />
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />

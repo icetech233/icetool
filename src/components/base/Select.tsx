@@ -4,6 +4,7 @@
  * - 触发器为 button，下拉面板通过 Portal 渲染到 `document.body`，
  *   避免被父容器的 `overflow: hidden` 或 `transform` 裁剪。
  * - 面板超出视口下方时自动翻转到触发器上方；随页面滚动 / 缩放重新定位。
+ * - 可选本地搜索：传入 `searchable` 后下拉面板顶部出现搜索框，按 label 模糊过滤。
  * - 键盘支持：↑/↓ 移动、Home/End 跳转、Enter/Space 确认、Esc 关闭。
  * - ARIA：焦点始终保留在触发器上，面板为 listbox，
  *   通过 aria-activedescendant 暴露当前高亮项。
@@ -13,6 +14,7 @@ import {
   useEffect,
   useId,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from 'react';
@@ -40,6 +42,10 @@ interface SelectProps<T extends string = string> {
   disabled?: boolean;
   /** 额外类名，作用于触发器按钮 */
   className?: string;
+  /** 是否启用本地搜索（按 label 模糊匹配） */
+  searchable?: boolean;
+  /** 搜索框占位文案 */
+  searchPlaceholder?: string;
 }
 
 const VIEWPORT_MARGIN = 8;
@@ -53,9 +59,12 @@ export default function Select<T extends string = string>({
   placeholder = '请选择',
   disabled = false,
   className,
+  searchable = false,
+  searchPlaceholder = '搜索…',
 }: SelectProps<T>) {
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [searchQuery, setSearchQuery] = useState('');
   const [pos, setPos] = useState<{
     top: number;
     left: number;
@@ -65,48 +74,58 @@ export default function Select<T extends string = string>({
 
   const triggerRef = useRef<HTMLButtonElement | null>(null);
   const listRef = useRef<HTMLDivElement | null>(null);
+  const searchInputRef = useRef<HTMLInputElement | null>(null);
   const listboxId = useId();
+
+  /** 搜索过滤后的选项列表 */
+  const filteredOptions = useMemo<SelectOption<T>[]>(() => {
+    if (!searchable || !searchQuery) return [...options];
+    const q = searchQuery.toLowerCase();
+    return options.filter((opt) => opt.label.toLowerCase().includes(q));
+  }, [options, searchable, searchQuery]);
 
   const selected = options.find((o) => o.value === value);
 
-  /** 从 from 出发沿 dir 方向找下一个可用选项索引，找不到返回 from */
+  /** 从 from 出发沿 dir 方向找下一个可用选项索引（基于过滤后列表），找不到返回 from */
   const moveActive = useCallback(
     (from: number, dir: 1 | -1): number => {
       let i = from + dir;
-      while (i >= 0 && i < options.length) {
-        if (!options[i].disabled) return i;
+      while (i >= 0 && i < filteredOptions.length) {
+        if (!filteredOptions[i].disabled) return i;
         i += dir;
       }
       return from;
     },
-    [options],
+    [filteredOptions],
   );
 
   const firstEnabledIndex = useCallback((): number => {
-    const idx = options.findIndex((o) => !o.disabled);
+    const idx = filteredOptions.findIndex((o) => !o.disabled);
     return idx;
-  }, [options]);
+  }, [filteredOptions]);
 
   const openList = useCallback(() => {
     if (disabled) return;
-    const selectedIdx = options.findIndex((o) => o.value === value);
+    setSearchQuery('');
+    const selectedIdx = filteredOptions.findIndex((o) => o.value === value);
     setActiveIndex(selectedIdx >= 0 ? selectedIdx : firstEnabledIndex());
     setOpen(true);
-  }, [disabled, options, value, firstEnabledIndex]);
+  }, [disabled, filteredOptions, value, firstEnabledIndex]);
 
   const closeList = useCallback((refocus = false) => {
     setOpen(false);
+    setSearchQuery('');
     if (refocus) triggerRef.current?.focus();
   }, []);
 
   const selectAt = useCallback(
-    (index: number) => {
-      const opt = options[index];
-      if (!opt || opt.disabled) return;
-      onChange(opt.value);
+    (filteredIndex: number) => {
+      const entry = filteredOptions[filteredIndex];
+      if (!entry || entry.disabled) return;
+      onChange(entry.value);
       closeList(true);
     },
-    [options, onChange, closeList],
+    [filteredOptions, onChange, closeList],
   );
 
   /** 根据触发器与面板尺寸计算定位，空间不足时向上翻转 */
@@ -163,14 +182,66 @@ export default function Select<T extends string = string>({
   // 高亮项变化时保证其滚动到可视区域
   useEffect(() => {
     if (!open || activeIndex < 0) return;
+    const entry = filteredOptions[activeIndex];
+    if (!entry) return;
     const item = listRef.current?.querySelector<HTMLElement>(
       `[data-index="${activeIndex}"]`,
     );
     item?.scrollIntoView({ block: 'nearest' });
-  }, [open, activeIndex]);
+  }, [open, activeIndex, filteredOptions]);
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
+  // 搜索词变化时重置高亮到第一个可用项
+  useEffect(() => {
+    if (!open) return;
+    const idx = filteredOptions.findIndex((o) => !o.disabled);
+    setActiveIndex(idx);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchQuery, open, filteredOptions]);
+
+  // 打开且可搜索时自动聚焦搜索框
+  useEffect(() => {
+    if (!open || !searchable) return;
+    requestAnimationFrame(() => searchInputRef.current?.focus());
+  }, [open, searchable]);
+
+  const onKeyDown = (e: React.KeyboardEvent) => {
     if (disabled) return;
+
+    // 搜索框内的键盘事件
+    if (searchable && e.target === searchInputRef.current) {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        if (searchQuery) {
+          setSearchQuery('');
+        } else {
+          closeList(true);
+        }
+        return;
+      }
+      if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        setActiveIndex((i) => moveActive(i, 1));
+        return;
+      }
+      if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        setActiveIndex((i) => moveActive(i, -1));
+        return;
+      }
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        selectAt(activeIndex);
+        return;
+      }
+      if (e.key === 'Tab') {
+        closeList();
+        return;
+      }
+      // 其余按键交给搜索框默认行为（输入文字）
+      return;
+    }
+
+    // 触发器上的键盘事件
     if (!open) {
       if (['ArrowDown', 'ArrowUp', 'Enter', ' '].includes(e.key)) {
         e.preventDefault();
@@ -193,8 +264,8 @@ export default function Select<T extends string = string>({
         break;
       case 'End': {
         e.preventDefault();
-        let i = options.length - 1;
-        while (i >= 0 && options[i].disabled) i -= 1;
+        let i = filteredOptions.length - 1;
+        while (i >= 0 && filteredOptions[i].disabled) i -= 1;
         setActiveIndex(i);
         break;
       }
@@ -239,7 +310,27 @@ export default function Select<T extends string = string>({
             }}
             className="max-h-64 overflow-auto rounded-lg border border-border bg-popover p-1 shadow-2xl"
           >
-            {options.map((opt, index) => {
+            {searchable && (
+              <div className="sticky top-0 z-10 mb-1 bg-popover px-1 pb-1">
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={searchPlaceholder}
+                  onKeyDown={onKeyDown}
+                  className="w-full rounded-md border border-border bg-card px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground focus:border-ring"
+                  role="searchbox"
+                  aria-label="搜索选项"
+                />
+              </div>
+            )}
+            {filteredOptions.length === 0 && (
+              <div className="px-2.5 py-2 text-xs text-muted-foreground text-center">
+                无匹配结果
+              </div>
+            )}
+            {filteredOptions.map((opt, index) => {
               const isSelected = opt.value === value;
               const isActive = index === activeIndex;
               return (
