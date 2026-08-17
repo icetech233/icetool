@@ -55,6 +55,12 @@
   --color-collapse-border: hsl(var(--collapse-border) / 100%);
   --color-collapse-shadow: hsl(var(--collapse-shadow) / 100%);
 
+  /* Select 下拉选项专属色彩（自动随 .dark 切换） */
+  --color-select-hover: hsl(var(--select-hover) / 100%);
+  --color-select-hover-fg: hsl(var(--select-hover-fg) / 100%);
+  --color-select-selected: hsl(var(--select-selected) / 100%);
+  --color-select-selected-fg: hsl(var(--select-selected-fg) / 100%);
+
   --radius-lg: var(--radius);
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);

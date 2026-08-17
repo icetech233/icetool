@@ -33,6 +33,12 @@
   焦点始终保留在触发器上，通过 `aria-activedescendant` 暴露当前高亮项。
 - **动画**：`motion/react` 的 `AnimatePresence` 做展开/收起过渡，方向随翻转自适应。
 - 支持 `disabled` 选项（鼠标与键盘均跳过）；选中项带对勾图标。
+- **选项配色**（专属 token，明暗两套，随 `.dark` 自动切换）：
+  - 悬浮 / 键盘高亮：淡蓝底 + 深蓝字（暗色下为低饱和深蓝底 + 亮蓝字）；
+  - 已选中：深蓝底 + 白字（暗色下为提亮蓝底 + 深字）；
+  - token 定义于 `global.css`（`--select-hover` / `--select-selected` 等），
+    在 `entry.css` 的 `@theme inline` 中注册为 `bg-select-hover`、`text-select-selected` 等工具类，
+    命名与对比度约定同「交换 / 清空 / 折叠」按钮一致（文本对底色 >= 4.5:1）。
 
 ## 2. `DiffPage.tsx`：语言选择改用 Select
 

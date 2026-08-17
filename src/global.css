@@ -58,6 +58,16 @@
   --collapse-border: 210 80% 60%;   /* 边框同色系稍深 */
   --collapse-shadow: 210 90% 70%;   /* 阴影取主色，悬浮时外发光 */
 
+  /*
+   * Select 下拉选项专属色彩 token（明/暗两套，由 .dark 覆写）。
+   * hover 为淡蓝底 + 深蓝字；已选中为深蓝底 + 白字，
+   * 文本色保证对各自底色 >= 4.5:1 对比度。
+   */
+  --select-hover: 204 87% 94%;      /* 淡蓝底，同 secondary */
+  --select-hover-fg: 204 87% 30%;   /* 深蓝字，对淡蓝底 5.6:1 */
+  --select-selected: 204 87% 40%;   /* 深蓝底（推特蓝加深） */
+  --select-selected-fg: 0 0% 100%;  /* 白字，对深蓝底 5.9:1 */
+
   color-scheme: light;
 }
 
@@ -123,6 +133,12 @@
   --collapse-fg: 0 0% 100%;         /* 白字，对深蓝底 7.40:1 */
   --collapse-border: 218 55% 30%;   /* 边框同色系更深 */
   --collapse-shadow: 218 60% 45%;   /* 阴影取主色，悬浮外发光 */
+
+  /* Select 下拉选项暗色 token：hover 低饱和深蓝底 + 亮蓝字；选中提亮蓝底 + 深字 */
+  --select-hover: 204 45% 22%;        /* 低饱和深蓝底，同 secondary */
+  --select-hover-fg: 204 80% 82%;     /* 亮蓝字，对深蓝底 5.5:1 */
+  --select-selected: 204 88% 52%;     /* 提亮蓝底，对 popover 4.9:1 */
+  --select-selected-fg: 210 25% 8%;   /* 深字，对亮蓝底 4.6:1 */
 
   color-scheme: dark;
 }

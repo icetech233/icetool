@@ -259,9 +259,11 @@ export default function Select<T extends string = string>({
                     'flex items-center justify-between gap-2 rounded-md px-2.5 py-1.5 text-xs cursor-pointer transition-colors',
                     opt.disabled
                       ? 'text-muted-foreground/50 cursor-not-allowed'
-                      : isActive
-                        ? 'bg-muted text-foreground'
-                        : 'text-popover-foreground',
+                      : isSelected
+                        ? 'bg-select-selected text-select-selected-fg'
+                        : isActive
+                          ? 'bg-select-hover text-select-hover-fg'
+                          : 'text-popover-foreground',
                   ].join(' ')}
                 >
                   <span className="truncate">{opt.label}</span>
@@ -275,7 +277,7 @@ export default function Select<T extends string = string>({
                       strokeWidth="2.5"
                       strokeLinecap="round"
                       strokeLinejoin="round"
-                      className="shrink-0 text-primary"
+                      className="shrink-0 text-select-selected-fg"
                     >
                       <path d="M20 6 9 17l-5-5" />
                     </svg>
