@@ -7,6 +7,8 @@ const Base64Page = lazy(() => import('./pages/Base64Page'));
 const UrlCodecPage = lazy(() => import('./pages/UrlCodecPage'));
 const ColorLabPage = lazy(() => import('./pages/ColorLabPage'));
 const JsonLabPage = lazy(() => import('./pages/JsonLabPage'));
+const TimestampPage = lazy(() => import('./pages/TimestampPage'));
+const DiffPage = lazy(() => import('./pages/DiffPage'));
 
 export const router = createBrowserRouter([
   {
@@ -19,6 +21,8 @@ export const router = createBrowserRouter([
       { path: 'url', element: <UrlCodecPage /> },
       { path: 'color', element: <ColorLabPage /> },
       { path: 'json', element: <JsonLabPage /> },
+      { path: 'timestamp', element: <TimestampPage /> },
+      { path: 'diff', element: <DiffPage /> },
       { path: '*', element: <Navigate to="/json" replace /> },
     ],
   },
