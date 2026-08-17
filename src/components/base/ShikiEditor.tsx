@@ -27,6 +27,8 @@ interface ShikiEditorProps {
   highlighter: ComponentProps<typeof ShikiHighlighter>['highlighter'] | null;
   /** textarea 的 name，用于表单等场景 */
   name?: string;
+  /** textarea 的 id，可与外部 label 的 htmlFor 关联 */
+  id?: string;
 }
 
 const MONO_STACK =
@@ -47,6 +49,7 @@ export default function ShikiEditor({
   language,
   highlighter,
   name,
+  id,
 }: ShikiEditorProps) {
   const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const highlightRef = useRef<HTMLDivElement | null>(null);
@@ -61,7 +64,8 @@ export default function ShikiEditor({
 
   useLayoutEffect(() => {
     syncScroll();
-  }, [value, language, syncScroll]);
+    // highlighter 异步加载完成后高亮层内容会重新渲染，也需要重新对齐滚动位置
+  }, [value, language, highlighter, syncScroll]);
 
   return (
     <div
@@ -100,6 +104,7 @@ export default function ShikiEditor({
       {/* 透明输入层：承载真实编辑行为；文字透明但保留 caret 与选中背景（selection）。 */}
       <textarea
         ref={textareaRef}
+        id={id}
         name={name}
         value={value}
         onChange={(e) => onChange(e.target.value)}

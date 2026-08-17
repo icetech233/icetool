@@ -6,13 +6,14 @@
  * - 中部：左右两个 Shiki 语法高亮编辑器。
  * - 下部：并排 side-by-side diff 结果，红/绿高亮删除/新增行。
  */
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, type ReactNode } from 'react';
 import { motion, type Variants } from 'motion/react';
 import {
   createHighlighterCore,
   createJavaScriptRegexEngine,
 } from 'react-shiki/core';
 import Seo from '../components/Seo';
+import Select from '../components/base/Select';
 import ShikiEditor from '../components/base/ShikiEditor';
 import { diffLines, toSideBySide, type DiffOptions } from '../utils/textDiff';
 import { useDiffHistory } from '../hooks/useDiffHistory';
@@ -53,7 +54,7 @@ function OptionToggle({
 }: {
   active: boolean;
   onClick: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   hint?: string;
 }) {
   return (
@@ -106,6 +107,7 @@ export default function DiffPage() {
 
   useEffect(() => {
     let disposed = false;
+    let hl: Awaited<ReturnType<typeof createHighlighterCore>> | null = null;
     createHighlighterCore({
       themes: [
         import('@shikijs/themes/github-light'),
@@ -118,11 +120,18 @@ export default function DiffPage() {
         import('@shikijs/langs/tsx'),
       ],
       engine: createJavaScriptRegexEngine(),
-    }).then((hl) => {
-      if (!disposed) setHighlighter(hl);
+    }).then((h) => {
+      // 组件在加载完成前卸载时，需要销毁后到达的高亮器，避免内存泄漏
+      if (disposed) {
+        h.dispose();
+        return;
+      }
+      hl = h;
+      setHighlighter(h);
     });
     return () => {
       disposed = true;
+      hl?.dispose();
     };
   }, []);
 
@@ -169,18 +178,12 @@ export default function DiffPage() {
 
       <motion.div className="mb-4 flex flex-wrap items-center gap-3" variants={itemVariants}>
         {/* 语言选择 */}
-        <div className="inline-flex items-center gap-1 rounded-lg bg-muted p-1" role="group" aria-label="语法高亮语言">
-          {LANGUAGES.map((lang) => (
-            <OptionToggle
-              key={lang.value}
-              active={language === lang.value}
-              onClick={() => setLanguage(lang.value)}
-              hint={`语法高亮：${lang.label}`}
-            >
-              {lang.label}
-            </OptionToggle>
-          ))}
-        </div>
+        <Select
+          value={language}
+          onChange={setLanguage}
+          options={LANGUAGES}
+          ariaLabel="语法高亮语言"
+        />
 
         <div className="h-5 w-px bg-border" aria-hidden="true" />
 
@@ -302,8 +305,9 @@ export default function DiffPage() {
       <div className="flex flex-col lg:flex-row gap-6 lg:items-stretch mb-6">
         <motion.div className="lg:flex-1 lg:basis-0 min-w-0" variants={itemVariants}>
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-            <label className="block text-sm font-medium text-foreground mb-3">原始文本</label>
+            <label htmlFor="diff-left-text" className="block text-sm font-medium text-foreground mb-3">原始文本</label>
             <ShikiEditor
+              id="diff-left-text"
               name="leftText"
               value={leftText}
               onChange={setLeftText}
@@ -316,8 +320,9 @@ export default function DiffPage() {
 
         <motion.div className="lg:flex-1 lg:basis-0 min-w-0" variants={itemVariants}>
           <div className="bg-card rounded-xl border border-border p-6 shadow-sm">
-            <label className="block text-sm font-medium text-foreground mb-3">对比文本</label>
+            <label htmlFor="diff-right-text" className="block text-sm font-medium text-foreground mb-3">对比文本</label>
             <ShikiEditor
+              id="diff-right-text"
               name="rightText"
               value={rightText}
               onChange={setRightText}
